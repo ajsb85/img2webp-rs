@@ -19,7 +19,7 @@ fn main() -> Result<()> {
         }
         if arg == "-version" {
             println!("WebP Encoder version: (linked via libwebp-sys)");
-            println!("Rust img2webp 1.0.2");
+            println!("Rust img2webp 1.0.3");
             return Ok(());
         }
     }
@@ -207,25 +207,30 @@ fn main() -> Result<()> {
         }
         jobs.extend(backward);
     } else if swing_mode {
-        // NEW SWING LOGIC: 
-        // 1. Forward 0 -> 50%
-        // 2. Backward 100% (of range) from that point (wrapping around 0 to the end)
+        // PENDULUM SWING LOGIC:
+        // Path: Start -> 50% -> Start -> -50% -> Start
         let n = jobs.len();
         let mid = n / 2;
         let mut sequence = Vec::new();
-        
-        // Phase 1: 0 to mid (forward)
-        for j in 0..=mid {
-            sequence.push(jobs[j].clone());
-        }
-        
-        // Phase 2: From mid-1 backward for N-1 steps
-        // This takes us through 0, then wraps to N-1, and ends at mid+1
-        for j in 1..n {
-            let idx = (mid + n - j) % n;
+
+        // Phase 1: 0 to mid (Forward)
+        sequence.extend(jobs.iter().take(mid + 1).cloned());
+
+        // Phase 2: From mid-1 backward for a full 100% length (N steps)
+        // This takes us from mid back through 0, wrapping around to the end,
+        // and finishing at the "other" mid (mid from the back side).
+        for j in 1..=n {
+            let idx = (mid + n * 2 - j) % n;
             sequence.push(jobs[idx].clone());
         }
-        // Result ends at mid+1. Loop repeat starts at 0. Smooth transition.
+
+        // Phase 3: Return from that back-side mid forward to Start (0)
+        // This closes the loop smoothly.
+        for j in 1..mid {
+            let idx = (mid + j) % n;
+            sequence.push(jobs[idx].clone());
+        }
+
         jobs = sequence;
     }
 
@@ -284,8 +289,7 @@ fn Help() {
     println!(" -alpha_filter <int> .. alpha filtering method (0..2), default 1");
     println!(" -reverse ............. reverse the order of input frames");
     println!(" -pingpong ............ forward then backward sequence for smooth looping");
-    // Updated help text for Swing
-    println!(" -swing ............... 0 to 50% then backward 100% range through start point");
+    println!(" -swing ............... pendulum loop: 0->50%->0->-50%->0");
     println!(" -v ................... verbose mode");
     println!(" -h ................... this help\n");
     println!("Per-frame options:");
