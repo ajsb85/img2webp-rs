@@ -19,7 +19,7 @@ fn main() -> Result<()> {
         }
         if arg == "-version" {
             println!("WebP Encoder version: (linked via libwebp-sys)");
-            println!("Rust img2webp 1.0.6");
+            println!("Rust img2webp 1.0.7");
             return Ok(());
         }
     }
@@ -284,7 +284,7 @@ fn Help() {
     println!(" -alpha_filter <int> .. alpha filtering method (0..2), default 1");
     println!(" -reverse ............. reverse the order of input frames");
     println!(" -pingpong ............ forward then backward sequence for smooth looping");
-    println!(" -swing ............... pendulum loop limited to 50% amplitude around start");
+    println!(" -swing ............... pendulum loop: 0 -> +25% -> 0 -> -25% -> 0");
     println!(" -v ................... verbose mode");
     println!(" -h ................... this help\n");
     println!("Per-frame options:");
