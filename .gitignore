@@ -5,3 +5,6 @@
 node_modules
 .env
 libwebp/
+img2webp-linux-x64*
+img2webp-windows-x64*
+img2webp-macos-x64*
