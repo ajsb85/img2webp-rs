@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebP Animation Optimization Benchmarks | img2webp-rs</title>
 
-    <!-- Spectrum Web Components via JSPM (Best practice for ESM modules) -->
+    <!-- Spectrum Web Components via JSPM (Standardized paths) -->
     <script type="module">
         import 'https://jspm.dev/@spectrum-web-components/theme/sp-theme.js';
         import 'https://jspm.dev/@spectrum-web-components/theme/src/themes.js';
@@ -13,9 +13,10 @@
         import 'https://jspm.dev/@spectrum-web-components/action-button/sp-action-button.js';
         import 'https://jspm.dev/@spectrum-web-components/action-group/sp-action-group.js';
         import 'https://jspm.dev/@spectrum-web-components/divider/sp-divider.js';
-        import 'https://jspm.dev/@spectrum-web-components/typography/sp-heading.js';
-        import 'https://jspm.dev/@spectrum-web-components/typography/sp-body.js';
-        import 'https://jspm.dev/@spectrum-web-components/typography/sp-detail.js';
+        // Typography components are in their own packages
+        import 'https://jspm.dev/@spectrum-web-components/heading/sp-heading.js';
+        import 'https://jspm.dev/@spectrum-web-components/body/sp-body.js';
+        import 'https://jspm.dev/@spectrum-web-components/detail/sp-detail.js';
     </script>
 
     <style>
@@ -271,15 +272,18 @@
             // Update selected state
             document.querySelectorAll('sp-action-button[id^="btn-"]').forEach(btn => btn.selected = false);
             const idMap = { 'checkered': 'btn-checkered', 'image-bg': 'btn-image', 'solid-bg': 'btn-dark', 'black-bg': 'btn-black' };
-            document.getElementById(idMap[cls]).selected = true;
+            const activeBtn = document.getElementById(idMap[cls]);
+            if (activeBtn) activeBtn.selected = true;
         }
 
         function setRendering(cls) {
             document.querySelectorAll('.benchmark-image').forEach(el => {
                 el.className = 'benchmark-image ' + cls;
             });
-            document.getElementById('btn-smooth').selected = (cls === 'smooth');
-            document.getElementById('btn-pixel').selected = (cls === 'pixelated');
+            const smoothBtn = document.getElementById('btn-smooth');
+            const pixelBtn = document.getElementById('btn-pixel');
+            if (smoothBtn) smoothBtn.selected = (cls === 'smooth');
+            if (pixelBtn) pixelBtn.selected = (cls === 'pixelated');
         }
     </script>
 </body>
