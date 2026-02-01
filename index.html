@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebP Transparent Animation Deep Dive</title>
+    <title>WebP Animation Optimization Benchmarks</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -100,31 +100,43 @@
         <div class="card">
             <h3>Standard</h3>
             <div class="demo-container checkered"><img src="animated.webp"></div>
-            <div class="stats">Size: ~1.26 MB<br>Flags: Default (Lossless)</div>
+            <div class="stats">Size: ~1.31 MB<br>Flags: Default (Lossless)</div>
         </div>
 
         <div class="card">
             <h3>Pixel Perfect</h3>
             <div class="demo-container checkered"><img src="animated_perfect.webp"></div>
-            <div class="stats">Size: ~1.33 MB<br>Flags: <code>-lossless -exact</code></div>
+            <div class="stats">Size: ~1.40 MB<br>Flags: <code>-lossless -exact</code></div>
         </div>
 
         <div class="card">
             <h3>Extreme Slow (M6)</h3>
             <div class="demo-container checkered"><img src="animated_slowest.webp"></div>
-            <div class="stats">Size: ~1.32 MB<br>Flags: <code>-m 6 -alpha_filter 2 -exact</code></div>
+            <div class="stats">Size: ~1.38 MB<br>Flags: <code>-m 6 -alpha_filter 2 -exact</code></div>
         </div>
 
         <div class="card">
             <h3>Optimized Small</h3>
             <div class="demo-container checkered"><img src="animated_small.webp"></div>
-            <div class="stats">Size: ~206 KB<br>Flags: <code>-min_size -mixed -alpha_q 50</code></div>
+            <div class="stats">Size: ~203 KB<br>Flags: <code>-min_size -mixed -alpha_q 50</code></div>
         </div>
 
         <div class="card">
             <h3>Lossy Sharp</h3>
             <div class="demo-container checkered"><img src="animated_lossy.webp"></div>
-            <div class="stats">Size: ~216 KB<br>Flags: <code>-lossy -q 75 -sharp_yuv</code></div>
+            <div class="stats">Size: ~209 KB<br>Flags: <code>-lossy -q 75 -sharp_yuv</code></div>
+        </div>
+
+        <div class="card">
+            <h3>Near Lossless (60)</h3>
+            <div class="demo-container checkered"><img src="animated_near_lossless60.webp"></div>
+            <div class="stats">Size: ~895 KB<br>Flags: <code>-near_lossless 60</code></div>
+        </div>
+
+        <div class="card">
+            <h3>Lossy Low Quality</h3>
+            <div class="demo-container checkered"><img src="animated_lossy_low.webp"></div>
+            <div class="stats">Size: ~125 KB<br>Flags: <code>-lossy -q 30 -alpha_q 30</code></div>
         </div>
     </div>
 
@@ -137,6 +149,7 @@
             <li><strong>Method (<code>-m 0-6</code>):</strong> Controls the complexity of the compression search. Level 6 is the "Enterprise Grade" setting for maximum compression, though significantly slower to encode.</li>
             <li><strong>Sharp YUV (<code>-sharp_yuv</code>):</strong> A more accurate RGB to YUV conversion that reduces artifacts at high-contrast edges, specifically targeting "ghosting" or "halos" in lossy animations.</li>
             <li><strong>Mixed Mode (<code>-mixed</code>):</strong> Allows the encoder to decide frame-by-frame whether lossless or lossy is better, often achieving the best quality-to-size ratio.</li>
+            <li><strong>Near Lossless (<code>-near_lossless</code>):</strong> A unique WebP feature that slightly adjusts pixel values to achieve much better compression while appearing nearly identical to the source.</li>
         </ul>
     </div>
 

@@ -1,6 +1,6 @@
 # Project Configuration
 BINARY_PATH = rs/target/release/img2webp
-OUTPUT_FILES = animated.webp animated_perfect.webp animated_lossy.webp animated_slowest.webp animated_small.webp
+OUTPUT_FILES = animated.webp animated_perfect.webp animated_lossy.webp animated_slowest.webp animated_small.webp animated_near_lossless60.webp animated_lossy_low.webp
 FRAMES = frames/frame_*.webp
 
 # Default target
@@ -26,6 +26,10 @@ generate: build
 	@$(BINARY_PATH) -o animated_small.webp -loop 0 -d 100 -min_size -mixed -alpha_q 50 $(FRAMES)
 	@echo "Generating slowest/best compression animation (-m 6)..."
 	@$(BINARY_PATH) -o animated_slowest.webp -loop 0 -d 100 -m 6 -alpha_filter 2 -exact $(FRAMES)
+	@echo "Generating near-lossless 60 animation..."
+	@$(BINARY_PATH) -o animated_near_lossless60.webp -loop 0 -d 100 -near_lossless 60 $(FRAMES)
+	@echo "Generating lossy low quality animation..."
+	@$(BINARY_PATH) -o animated_lossy_low.webp -loop 0 -d 100 -lossy -q 30 -alpha_q 30 $(FRAMES)
 
 # Run Rust tests
 .PHONY: test
