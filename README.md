@@ -9,6 +9,17 @@ An **Enterprise Grade Rust** migration of the Google `img2webp` utility. This pr
 Explore the interactive comparison of different optimization strategies:
 👉 **[https://ajsb85.github.io/img2webp-rs/](https://ajsb85.github.io/img2webp-rs/)**
 
+## 🖼️ Showcase: Optimized Small
+
+Below is a live example of a transparent animation generated using the **Optimized Small** strategy. It leverages `-mixed` mode and `-alpha_q 50` to achieve a ~80% reduction in file size while maintaining excellent visual quality for transparent edges.
+
+![Optimized Small Animation](animated_small.webp)
+
+**Command used to generate this file:**
+```bash
+img2webp -o animated_small.webp -loop 0 -d 100 -min_size -mixed -alpha_q 50 frames/*.webp
+```
+
 ---
 
 ## 🚀 Features
