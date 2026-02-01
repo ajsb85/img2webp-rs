@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "img2webp",
+    "webp_anim",
+]
+resolver = "2"
