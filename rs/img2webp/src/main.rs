@@ -19,7 +19,7 @@ fn main() -> Result<()> {
         }
         if arg == "-version" {
             println!("WebP Encoder version: (linked via libwebp-sys)");
-            println!("Rust img2webp 1.0.3");
+            println!("Rust img2webp 1.0.4");
             return Ok(());
         }
     }
@@ -130,7 +130,7 @@ fn main() -> Result<()> {
                     i += 1;
                 }
             }
-            _ => {}
+            _ => {} // This is a comment, not code that needs escaping
         }
         i += 1;
     }
@@ -207,30 +207,26 @@ fn main() -> Result<()> {
         }
         jobs.extend(backward);
     } else if swing_mode {
-        // PENDULUM SWING LOGIC:
-        // Path: Start -> 50% -> Start -> -50% -> Start
+        // REFINED SWING: Centered Pendulum Loop
+        // Displacement: 25% of total frames in each direction (50% total amplitude)
         let n = jobs.len();
-        let mid = n / 2;
+        let peak = n / 4; 
         let mut sequence = Vec::new();
 
-        // Phase 1: 0 to mid (Forward)
-        sequence.extend(jobs.iter().take(mid + 1).cloned());
-
-        // Phase 2: From mid-1 backward for a full 100% length (N steps)
-        // This takes us from mid back through 0, wrapping around to the end,
-        // and finishing at the "other" mid (mid from the back side).
-        for j in 1..=n {
-            let idx = (mid + n * 2 - j) % n;
+        // 1. Center to +25% (Forward)
+        for j in 0..=peak {
+            sequence.push(jobs[j].clone());
+        }
+        // 2. +25% back to Center, then to -25% (Full 50% Sweep Backward)
+        for j in 1..=(peak * 2) {
+            let idx = (peak + n * 2 - j) % n;
             sequence.push(jobs[idx].clone());
         }
-
-        // Phase 3: Return from that back-side mid forward to Start (0)
-        // This closes the loop smoothly.
-        for j in 1..mid {
-            let idx = (mid + j) % n;
+        // 3. -25% back to Center (Forward)
+        for j in 1..peak {
+            let idx = (n - peak + j) % n;
             sequence.push(jobs[idx].clone());
         }
-
         jobs = sequence;
     }
 
@@ -289,7 +285,7 @@ fn Help() {
     println!(" -alpha_filter <int> .. alpha filtering method (0..2), default 1");
     println!(" -reverse ............. reverse the order of input frames");
     println!(" -pingpong ............ forward then backward sequence for smooth looping");
-    println!(" -swing ............... pendulum loop: 0->50%->0->-50%->0");
+    println!(" -swing ............... pendulum loop limited to 50% amplitude around start");
     println!(" -v ................... verbose mode");
     println!(" -h ................... this help\n");
     println!("Per-frame options:");
