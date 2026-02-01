@@ -480,7 +480,7 @@ dependencies = [
 
 [[package]]
 name = "img2webp"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "anyhow",
  "env_logger",
@@ -1160,7 +1160,7 @@ dependencies = [
 
 [[package]]
 name = "webp_anim"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "image",
  "libc",
