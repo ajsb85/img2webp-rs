@@ -13,7 +13,7 @@ Explore the interactive comparison of different optimization strategies:
 
 Below is a live example of a transparent animation generated using the **Optimized Small** strategy. It leverages `-mixed` mode and `-alpha_q 50` to achieve a ~80% reduction in file size while maintaining excellent visual quality for transparent edges.
 
-![Optimized Small Animation](animated_small.webp)
+![Optimized Small Animation](assets/animated_small.webp)
 
 **Command used to generate this file:**
 ```bash
