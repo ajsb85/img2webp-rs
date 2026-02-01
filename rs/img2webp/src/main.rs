@@ -19,7 +19,7 @@ fn main() -> Result<()> {
         }
         if arg == "-version" {
             println!("WebP Encoder version: (linked via libwebp-sys)");
-            println!("Rust img2webp 1.0.0");
+            println!("Rust img2webp 1.0.2");
             return Ok(());
         }
     }
@@ -130,7 +130,7 @@ fn main() -> Result<()> {
                     i += 1;
                 }
             }
-            _ => {} // No change needed here
+            _ => {}
         }
         i += 1;
     }
@@ -207,26 +207,26 @@ fn main() -> Result<()> {
         }
         jobs.extend(backward);
     } else if swing_mode {
-        // SWING: 0->50%, then 50%->0%->100%->50% (Reversed Full Loop)
+        // NEW SWING LOGIC: 
+        // 1. Forward 0 -> 50%
+        // 2. Backward 100% (of range) from that point (wrapping around 0 to the end)
         let n = jobs.len();
         let mid = n / 2;
-
-        let part1 = jobs[0..mid].to_vec();
-        let mut full_reversed = jobs.clone();
-        full_reversed.reverse();
-
-        // Find the index of the 'mid' frame in the reversed sequence
-        // The frame at 'mid' in original is at index 'n - 1 - mid' in reversed
-        let rev_mid_idx = n - 1 - mid;
-
-        let mut part2 = Vec::new();
-        for j in 0..n {
-            let idx = (rev_mid_idx + j) % n;
-            part2.push(full_reversed[idx].clone());
+        let mut sequence = Vec::new();
+        
+        // Phase 1: 0 to mid (forward)
+        for j in 0..=mid {
+            sequence.push(jobs[j].clone());
         }
-
-        jobs = part1;
-        jobs.extend(part2);
+        
+        // Phase 2: From mid-1 backward for N-1 steps
+        // This takes us through 0, then wraps to N-1, and ends at mid+1
+        for j in 1..n {
+            let idx = (mid + n - j) % n;
+            sequence.push(jobs[idx].clone());
+        }
+        // Result ends at mid+1. Loop repeat starts at 0. Smooth transition.
+        jobs = sequence;
     }
 
     let mut encoder: Option<AnimationEncoder> = None;
@@ -284,7 +284,8 @@ fn Help() {
     println!(" -alpha_filter <int> .. alpha filtering method (0..2), default 1");
     println!(" -reverse ............. reverse the order of input frames");
     println!(" -pingpong ............ forward then backward sequence for smooth looping");
-    println!(" -swing ............... 0 to 50% then backward 100% through the loop");
+    // Updated help text for Swing
+    println!(" -swing ............... 0 to 50% then backward 100% range through start point");
     println!(" -v ................... verbose mode");
     println!(" -h ................... this help\n");
     println!("Per-frame options:");

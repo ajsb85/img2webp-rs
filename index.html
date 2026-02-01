@@ -12,8 +12,6 @@
         :root {
             --card-radius: 16px;
             --static-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-            
-            /* UNBREAKABLE SVG PATTERNS */
             --checkered-svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Crect width='8' height='8' fill='%23f6f8fa'/%3E%3Crect x='8' y='8' width='8' height='8' fill='%23f6f8fa'/%3E%3C/svg%3E");
             --checkered-bg: #ffffff;
         }
@@ -24,7 +22,6 @@
         }
 
         body {
-            /* High Contrast: body uses inset/subtle canvas */
             background-color: var(--color-canvas-inset);
             min-height: 100vh;
             display: flex;
@@ -37,7 +34,6 @@
             border-bottom: 1px solid var(--color-border-default);
         }
 
-        /* High Contrast Card - Static (Professional engineering look) */
         .Box--benchmark {
             background-color: var(--color-canvas-default) !important;
             border-radius: var(--card-radius) !important;
@@ -49,7 +45,6 @@
             overflow: hidden;
         }
 
-        /* The Stage: Transparency Simulation */
         .preview-stage {
             position: relative;
             height: 260px;
@@ -58,10 +53,8 @@
             align-items: center;
             overflow: hidden;
             border-bottom: 1px solid var(--color-border-muted);
-            background-color: var(--color-canvas-inset);
         }
 
-        /* UNBREAKABLE CHECKERED EFFECT */
         .checkered {
             background-color: var(--checkered-bg);
             background-image: var(--checkered-svg);
@@ -130,7 +123,7 @@
             pointer-events: none;
         }
 
-        .tech-box {
+        .tech-card {
             background-color: var(--color-canvas-default);
             border-radius: 20px;
             border: 1px solid var(--color-border-default);
@@ -204,24 +197,25 @@
 
     <main class="container-xl px-3 pt-6 pb-8">
         <div class="Subhead mb-4 border-bottom-0">
-            <div class="Subhead-heading f0-light">Transparency Optimization</div>
-            <div class="Subhead-description f3">Benchmarks of 7 encoding strategies for animated transparent assets.</div>
+            <div class="Subhead-heading f0-light">Transparency Showcase</div>
+            <div class="Subhead-description f3">Benchmarks of 10 distinct encoding strategies for optimized transparent animated assets.</div>
         </div>
 
         <div class="benchmark-grid">
-            <!-- Benchmarks -->
+            <!-- 1. Standard -->
             <div class="Box Box--benchmark">
                 <div class="preview-stage checkered">
                     <img src="animated.webp" class="benchmark-img">
                 </div>
                 <div class="Box-body p-4">
                     <h3 class="f4 mb-2">Standard</h3>
-                    <p class="color-fg-muted f6">Industry standard lossless. Balanced, but may zero-out "invisible" RGB data.</p>
+                    <p class="color-fg-muted f6">Industry baseline lossless. Balanced, but may zero-out "invisible" RGB data.</p>
                     <div class="stats-badge mt-3">1.31 MB</div>
                 </div>
                 <div class="card-footer"><code class="f6 color-fg-muted">Default</code></div>
             </div>
 
+            <!-- 2. Pixel Perfect -->
             <div class="Box Box--benchmark">
                 <div class="preview-stage checkered">
                     <img src="animated_perfect.webp" class="benchmark-img">
@@ -234,6 +228,59 @@
                 <div class="card-footer"><code class="f6 color-fg-muted">-lossless -exact</code></div>
             </div>
 
+            <!-- 3. Swing Loop -->
+            <div class="Box Box--benchmark border-accent shadow-medium">
+                <div class="preview-stage checkered">
+                    <img src="animated_swing.webp" class="benchmark-img">
+                </div>
+                <div class="Box-body p-4">
+                    <h3 class="f4 mb-2 color-fg-accent">Swing Loop</h3>
+                    <p class="color-fg-muted f6">0 to 50% then 100% backward. A complex temporal loop for smooth teases.</p>
+                    <div class="stats-badge color-bg-accent-emphasis color-fg-on-emphasis mt-3" style="border:none">1.98 MB</div>
+                </div>
+                <div class="card-footer"><code class="f6 color-fg-muted">-swing</code></div>
+            </div>
+
+            <!-- 4. Backward Sequence -->
+            <div class="Box Box--benchmark">
+                <div class="preview-stage checkered">
+                    <img src="animated_backward.webp" class="benchmark-img">
+                </div>
+                <div class="Box-body p-4">
+                    <h3 class="f4 mb-2">Backward Sequence</h3>
+                    <p class="color-fg-muted f6">Last frame first, first frame last. Reverses the entire temporal flow.</p>
+                    <div class="stats-badge mt-3">1.31 MB</div>
+                </div>
+                <div class="card-footer"><code class="f6 color-fg-muted">-reverse</code></div>
+            </div>
+
+            <!-- 5. Ping-Pong Loop -->
+            <div class="Box Box--benchmark">
+                <div class="preview-stage checkered">
+                    <img src="animated_pingpong.webp" class="benchmark-img">
+                </div>
+                <div class="Box-body p-4">
+                    <h3 class="f4 mb-2">Ping-Pong Loop</h3>
+                    <p class="color-fg-muted f6">Forward then backward. Eliminates the "jump" artifact in infinite loops.</p>
+                    <div class="stats-badge mt-3">2.58 MB</div>
+                </div>
+                <div class="card-footer"><code class="f6 color-fg-muted">-pingpong</code></div>
+            </div>
+
+            <!-- 6. Optimized Small -->
+            <div class="Box Box--benchmark">
+                <div class="preview-stage checkered">
+                    <img src="animated_small.webp" class="benchmark-img">
+                </div>
+                <div class="Box-body p-4">
+                    <h3 class="f4 mb-2">Optimized Small</h3>
+                    <p class="color-fg-muted f6">Intelligent mixed-mode strategy. ~85% reduction with high visual fidelity.</p>
+                    <div class="stats-badge mt-3">203 KB</div>
+                </div>
+                <div class="card-footer"><code class="f6 color-fg-muted">-mixed -alpha_q 50</code></div>
+            </div>
+
+            <!-- 7. Extreme Slow -->
             <div class="Box Box--benchmark">
                 <div class="preview-stage checkered">
                     <img src="animated_slowest.webp" class="benchmark-img">
@@ -246,18 +293,7 @@
                 <div class="card-footer"><code class="f6 color-fg-muted">-m 6 -alpha_filter 2</code></div>
             </div>
 
-            <div class="Box Box--benchmark border-accent">
-                <div class="preview-stage checkered">
-                    <img src="animated_small.webp" class="benchmark-img">
-                </div>
-                <div class="Box-body p-4">
-                    <h3 class="f4 mb-2 color-fg-accent">Optimized Small</h3>
-                    <p class="color-fg-muted f6">Intelligent mixed-mode strategy. ~85% reduction with high visual fidelity.</p>
-                    <div class="stats-pill color-bg-accent-emphasis color-fg-on-emphasis mt-3" style="border:none">203 KB</div>
-                </div>
-                <div class="card-footer"><code class="f6 color-fg-muted">-mixed -alpha_q 50</code></div>
-            </div>
-
+            <!-- 8. Near Lossless -->
             <div class="Box Box--benchmark">
                 <div class="preview-stage checkered">
                     <img src="animated_near_lossless60.webp" class="benchmark-img">
@@ -270,6 +306,7 @@
                 <div class="card-footer"><code class="f6 color-fg-muted">-near_lossless 60</code></div>
             </div>
 
+            <!-- 9. Lossy Sharp -->
             <div class="Box Box--benchmark">
                 <div class="preview-stage checkered">
                     <img src="animated_lossy.webp" class="benchmark-img">
@@ -282,64 +319,60 @@
                 <div class="card-footer"><code class="f6 color-fg-muted">-lossy -q 75 -sharp_yuv</code></div>
             </div>
 
+            <!-- 10. Lossy Low -->
             <div class="Box Box--benchmark">
                 <div class="preview-stage checkered">
                     <img src="animated_lossy_low.webp" class="benchmark-img">
                 </div>
                 <div class="Box-body p-4">
                     <h3 class="f4 mb-2">Lossy Low</h3>
-                    <p class="color-fg-muted f6">Absolute footprint floor for critical bandwidth constraints. Noticeable artifacts.</p>
+                    <p class="color-fg-muted f6">Absolute footprint floor for bandwidth constraints. Noticeable artifacts.</p>
                     <div class="stats-badge mt-3">125 KB</div>
                 </div>
                 <div class="card-footer"><code class="f6 color-fg-muted">-q 30 -alpha_q 30</code></div>
             </div>
         </div>
 
-        <!-- EXTENDED Technical Architecture Section -->
+        <!-- Technical Architecture Section -->
         <div class="mt-8" id="technical-architecture">
             <div class="Subhead mb-4 border-bottom-0">
                 <div class="Subhead-heading">Technical Architecture Deep Dive</div>
             </div>
             
-            <div class="tech-box p-6 markdown-body">
+            <div class="tech-card p-6 markdown-body">
                 <div class="architecture-grid">
                     <div>
-                        <h3>1. Modular Workspace & FFI Layer</h3>
-                        <p>The <code>img2webp-rs</code> architecture is designed as a decoupled multi-crate workspace to ensure maximum safety and maintainability.</p>
+                        <h3>Modular Workspace & FFI Layer</h3>
+                        <p>The <code>img2webp-rs</code> architecture separates concerns into a decoupled multi-crate workspace:</p>
                         <ul>
-                            <li><strong>webp_anim (Core Library):</strong> A safe Rust abstraction over <code>libwebp-sys</code>. It manages the low-level lifecycle of C-allocated muxer objects using Rust's RAII patterns and automated memory cleanup via the <code>Drop</code> trait.</li>
-                            <li><strong>img2webp (CLI Driver):</strong> A stateful command-line driver featuring a non-linear two-pass argument parser. This enables the ability to interleave frame-specific configurations (quality, duration) with sequence inputs.</li>
+                            <li><strong>webp_anim (Core Library):</strong> A safe Rust abstraction over <code>libwebp-sys</code>. It manages the full lifecycle of C-allocated muxer objects using Rust's RAII patterns and automated memory cleanup via the <code>Drop</code> trait.</li>
+                            <li><strong>img2webp (CLI Driver):</strong> A stateful command-line interface featuring a non-linear two-pass argument parser. This enables the ability to interleave frame-specific configurations (quality, duration) with sequence inputs.</li>
                         </ul>
                     </div>
                     <div>
-                        <h3>2. The Pixel-Perfect Integrity Stage</h3>
-                        <p>A primary design goal was providing granular control over the <code>-exact</code> flag. By default, WebP may zero-out RGB data in pixels with 0% alpha to maximize compression. Our tool allows preserving this data, which is critical for preventing the "Dark Fringe" artifacts during linear interpolation in browsers.</p>
+                        <h3>Temporal Manipulation Engine</h3>
+                        <p>A primary enhancement in <code>img2webp-rs</code> is the <strong>Stateful Job Queue</strong>. Unlike standard C converters, we buffer the entire encoding plan, allowing flags like <code>-reverse</code>, <code>-pingpong</code>, and <code>-swing</code> to manipulate the temporal sequence before the expensive encoding logic begins.</p>
                     </div>
                 </div>
 
                 <div class="mt-6 border-top pt-6">
-                    <h3>3. Advanced Alpha Filtering Engine</h3>
-                    <p>One of our key optimizations is the exposure of the spatial alpha prediction algorithm. By utilizing <code>-alpha_filter 2</code> (Best), the encoder performs an exhaustive search of the spatial neighborhood to predict transparency values, drastically reducing entropy.</p>
+                    <h3>Advanced Alpha Filtering & Pipeline</h3>
+                    <p>Asset generation follows a rigid 4-stage deterministic pipeline:</p>
+                    <ol>
+                        <li><strong>Safe Decoding:</strong> Imagery is decoded into raw RGBA8 buffers using audited Rust decoders (PNG, TIFF, BMP, etc.).</li>
+                        <li><strong>Minimal Differencing:</strong> The <code>WebPAnimEncoder</code> calculates the optimal sub-rectangle delta between sequential frames to minimize bitstream weight.</li>
+                        <li><strong>Pixel-Perfect Integrity:</strong> The <code>-exact</code> flag preserves raw RGB data at 0% Alpha, preventing the "Dark Halo" effect common in browser rendering.</li>
+                        <li><strong>Remuxing Engine:</strong> Post-assembly metadata injection via <code>WebPMux</code>.</li>
+                    </ol>
                     
                     <div class="code-view">
-                        // img2webp-rs Internal Alpha Logic
+                        // img2webp-rs Internal Alpha Selection
                         match config.alpha_filtering {
-                            0 => "None: No spatial prediction used",
+                            0 => "None: Direct bitstream storage",
                             1 => "Fast: Horizontal/Vertical heuristic prediction",
-                            2 => "Best: Full spatial neighborhood analysis",
+                            2 => "Best: Full spatial neighborhood analysis (M6)",
                         }
                     </div>
-                </div>
-
-                <div class="mt-6 border-top pt-6">
-                    <h3>4. High-Performance Assembly Pipeline</h3>
-                    <p>Asset generation follows a rigid 4-stage deterministic pipeline to ensure bit-perfect replication of design intent:</p>
-                    <ol>
-                        <li><strong>Safe Decoding:</strong> Source imagery is decoded into raw RGBA8 buffers using audited Rust decoders (PNG, TIFF, BMP, etc.).</li>
-                        <li><strong>Minimal Differencing:</strong> The <code>WebPAnimEncoder</code> calculates the optimal sub-rectangle delta between sequential frames to minimize bitstream weight.</li>
-                        <li><strong>Remuxing Engine:</strong> Post-assembly remuxing via <code>WebPMux</code> allows for the injection of secondary metadata, including loop counts and animation-level control flags.</li>
-                        <li><strong>Validation:</strong> Final bitstream validation against WebP container specifications.</li>
-                    </ol>
                 </div>
             </div>
         </div>
@@ -349,7 +382,7 @@
         <div class="container-xl px-3 d-flex flex-column flex-md-row flex-justify-between flex-items-center">
             <div class="d-flex flex-items-center">
                 <svg height="24" class="octicon octicon-mark-github mr-3 color-fg-muted" viewBox="0 0 16 16" version="1.1" width="24"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
-                <span class="f6 color-fg-muted">&copy; 2026 img2webp-rs. Architecture by ajsb85.</span>
+                <span class="f6 color-fg-muted">&copy; 2026 img2webp-rs. Built with Primer.</span>
             </div>
             <nav class="d-flex">
                 <a class="Link--secondary f6 mr-4" href="https://github.com/ajsb85/img2webp-rs">Source Code</a>

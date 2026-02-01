@@ -1,7 +1,7 @@
 # Project Configuration
 BINARY_NAME = img2webp
 BINARY_PATH = rs/target/release/$(BINARY_NAME)
-OUTPUT_FILES = animated.webp animated_perfect.webp animated_lossy.webp animated_slowest.webp animated_small.webp animated_near_lossless60.webp animated_lossy_low.webp animated_backward.webp
+OUTPUT_FILES = animated.webp animated_perfect.webp animated_lossy.webp animated_slowest.webp animated_small.webp animated_near_lossless60.webp animated_lossy_low.webp animated_backward.webp animated_pingpong.webp animated_swing.webp
 FRAMES = frames/frame_*.webp
 
 # Default target
@@ -33,6 +33,10 @@ generate: build
 	@$(BINARY_PATH) -o animated_lossy_low.webp -loop 0 -d 100 -lossy -q 30 -alpha_q 30 $(FRAMES)
 	@echo "Generating backward animation (-reverse)..."
 	@$(BINARY_PATH) -o animated_backward.webp -loop 0 -d 100 -reverse $(FRAMES)
+	@echo "Generating ping-pong loop (-pingpong)..."
+	@$(BINARY_PATH) -o animated_pingpong.webp -loop 0 -d 100 -pingpong $(FRAMES)
+	@echo "Generating swing loop (-swing)..."
+	@$(BINARY_PATH) -o animated_swing.webp -loop 0 -d 100 -swing $(FRAMES)
 
 # Run Rust tests
 .PHONY: test
@@ -93,10 +97,11 @@ sign: build
 help:
 	@echo "Available targets:"
 	@echo "  make build           - Build the Rust tool (native)"
-	@echo "  make generate        - Create all 8 WebP animation variants"
+	@echo "  make generate        - Create all 10 WebP animation variants"
 	@echo "  make test            - Run Rust unit tests"
 	@echo "  make lint            - Auto-fix lints and format code"
 	@echo "  make check           - Comprehensive Lint + Test"
 	@echo "  make deploy          - Check, Generate Assets, and Push to GH Pages"
 	@echo "  make release VERSION=vX.Y.Z - Tag and trigger Multi-Platform release"
 	@echo "  make clean           - Remove all build and asset artifacts"
+	@echo "  make all             - Build and generate (default)"
