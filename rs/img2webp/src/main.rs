@@ -29,6 +29,8 @@ fn main() -> Result<()> {
     let mut output_path = String::new();
     let mut loop_count = 0;
     let mut reverse_frames = false;
+    let mut ping_pong = false;
+    let mut swing_mode = false;
 
     // First pass: Global options
     let mut i = 1;
@@ -92,6 +94,14 @@ fn main() -> Result<()> {
                 reverse_frames = true;
                 parsed_args[i] = true;
             }
+            "-pingpong" => {
+                ping_pong = true;
+                parsed_args[i] = true;
+            }
+            "-swing" => {
+                swing_mode = true;
+                parsed_args[i] = true;
+            }
             "-v" => {
                 options.verbose = true;
                 parsed_args[i] = true;
@@ -120,12 +130,13 @@ fn main() -> Result<()> {
                     i += 1;
                 }
             }
-            _ => {} 
+            _ => {} // No change needed here
         }
         i += 1;
     }
 
     // Second pass: Collect files and frame configs
+    #[derive(Clone)]
     struct FrameJob {
         path: String,
         config: FrameConfig,
@@ -184,9 +195,38 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
-    // APPLY REVERSE LOGIC
+    // SEQUENCE MANIPULATION
     if reverse_frames {
         jobs.reverse();
+    } else if ping_pong {
+        let mut backward = jobs.clone();
+        backward.reverse();
+        if backward.len() > 2 {
+            backward.remove(0);
+            backward.pop();
+        }
+        jobs.extend(backward);
+    } else if swing_mode {
+        // SWING: 0->50%, then 50%->0%->100%->50% (Reversed Full Loop)
+        let n = jobs.len();
+        let mid = n / 2;
+
+        let part1 = jobs[0..mid].to_vec();
+        let mut full_reversed = jobs.clone();
+        full_reversed.reverse();
+
+        // Find the index of the 'mid' frame in the reversed sequence
+        // The frame at 'mid' in original is at index 'n - 1 - mid' in reversed
+        let rev_mid_idx = n - 1 - mid;
+
+        let mut part2 = Vec::new();
+        for j in 0..n {
+            let idx = (rev_mid_idx + j) % n;
+            part2.push(full_reversed[idx].clone());
+        }
+
+        jobs = part1;
+        jobs.extend(part2);
     }
 
     let mut encoder: Option<AnimationEncoder> = None;
@@ -243,6 +283,8 @@ fn Help() {
     println!(" -alpha_method <int> .. alpha compression method (0..1), default 1");
     println!(" -alpha_filter <int> .. alpha filtering method (0..2), default 1");
     println!(" -reverse ............. reverse the order of input frames");
+    println!(" -pingpong ............ forward then backward sequence for smooth looping");
+    println!(" -swing ............... 0 to 50% then backward 100% through the loop");
     println!(" -v ................... verbose mode");
     println!(" -h ................... this help\n");
     println!("Per-frame options:");
