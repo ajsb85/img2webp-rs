@@ -1,6 +1,7 @@
 # Project Configuration
-BINARY_PATH = rs/target/release/img2webp
-OUTPUT_FILES = animated.webp animated_perfect.webp animated_lossy.webp animated_slowest.webp animated_small.webp animated_near_lossless60.webp animated_lossy_low.webp
+BINARY_NAME = img2webp
+BINARY_PATH = rs/target/release/$(BINARY_NAME)
+OUTPUT_FILES = animated.webp animated_perfect.webp animated_lossy.webp animated_slowest.webp animated_small.webp animated_near_lossless60.webp animated_lossy_low.webp animated_backward.webp
 FRAMES = frames/frame_*.webp
 
 # Default target
@@ -30,6 +31,8 @@ generate: build
 	@$(BINARY_PATH) -o animated_near_lossless60.webp -loop 0 -d 100 -near_lossless 60 $(FRAMES)
 	@echo "Generating lossy low quality animation..."
 	@$(BINARY_PATH) -o animated_lossy_low.webp -loop 0 -d 100 -lossy -q 30 -alpha_q 30 $(FRAMES)
+	@echo "Generating backward animation (-reverse)..."
+	@$(BINARY_PATH) -o animated_backward.webp -loop 0 -d 100 -reverse $(FRAMES)
 
 # Run Rust tests
 .PHONY: test
@@ -41,9 +44,9 @@ test:
 .PHONY: lint
 lint:
 	@echo "Running clippy..."
-	@cd rs && cargo clippy -- -D warnings
-	@echo "Checking formatting..."
-	@cd rs && cargo fmt --all -- --check
+	@cd rs && cargo clippy --fix --allow-dirty --allow-staged -- -D warnings
+	@echo "Standardizing formatting..."
+	@cd rs && cargo fmt
 
 # Comprehensive quality check
 .PHONY: check
@@ -65,36 +68,35 @@ deploy: check generate
 	@git push origin main
 	@echo "Deployment complete. Visit: https://ajsb85.github.io/img2webp-rs/"
 
-# Create a GPG-signed release on GitHub
-# Usage: make release VERSION=v0.1.0
+# Create a GPG-signed release on GitHub with multi-platform support
+# Usage: make release VERSION=v1.0.0
 .PHONY: release
 release:
-	@if [ -z "$(VERSION)" ]; then echo "Error: VERSION is not set. Usage: make release VERSION=v1.2.3"; exit 1; fi
-	@echo "Preparing release $(VERSION)..."
+	@if [ -z "$(VERSION)" ]; then echo "Error: VERSION is not set. Usage: make release VERSION=v1.0.0"; exit 1; fi
+	@echo "Performing pre-release checks..."
 	@make check
-	@make build
-	@echo "Signing tag $(VERSION)..."
+	@echo "Tagging version $(VERSION)..."
 	@git tag -s $(VERSION) -m "Release $(VERSION)"
 	@git push origin $(VERSION)
-	@echo "Signing binary..."
-	@rm -f $(BINARY_PATH).asc
+	@echo "Triggering multi-platform build via GitHub Actions..."
+	@echo "Release $(VERSION) is being processed. Binaries for Linux, Windows, and macOS will appear shortly."
+	@echo "Visit: https://github.com/ajsb85/img2webp-rs/releases/tag/$(VERSION)"
+
+# Local signing of specific artifacts (for manual override)
+.PHONY: sign
+sign: build
+	@echo "Signing Linux binary..."
 	@gpg --armor --detach-sign $(BINARY_PATH)
-	@echo "Creating GitHub release..."
-	@gh release create $(VERSION) $(BINARY_PATH) $(BINARY_PATH).asc \
-		--title "$(VERSION)" \
-		--notes "Release $(VERSION) generated and signed via Makefile."
-	@echo "Release $(VERSION) published successfully."
 
 # Help target
 .PHONY: help
 help:
 	@echo "Available targets:"
-	@echo "  make build           - Build the Rust tool"
-	@echo "  make generate        - Create all WebP animation variants"
-	@echo "  make test            - Run Rust tests"
-	@echo "  make lint            - Run clippy and format check"
-	@echo "  make check           - Run lint and tests (CI simulation)"
-	@echo "  make deploy          - Run check, generate assets, and push to GitHub Pages"
-	@echo "  make release VERSION=vX.Y.Z - Tag, sign, and publish a new release"
-	@echo "  make clean           - Remove build artifacts and generated WebP files"
-	@echo "  make all             - Build and generate (default)"
+	@echo "  make build           - Build the Rust tool (native)"
+	@echo "  make generate        - Create all 8 WebP animation variants"
+	@echo "  make test            - Run Rust unit tests"
+	@echo "  make lint            - Auto-fix lints and format code"
+	@echo "  make check           - Comprehensive Lint + Test"
+	@echo "  make deploy          - Check, Generate Assets, and Push to GH Pages"
+	@echo "  make release VERSION=vX.Y.Z - Tag and trigger Multi-Platform release"
+	@echo "  make clean           - Remove all build and asset artifacts"

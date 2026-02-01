@@ -19,7 +19,7 @@ fn main() -> Result<()> {
         }
         if arg == "-version" {
             println!("WebP Encoder version: (linked via libwebp-sys)");
-            println!("Rust img2webp 0.1.0");
+            println!("Rust img2webp 1.0.0");
             return Ok(());
         }
     }
@@ -28,6 +28,7 @@ fn main() -> Result<()> {
     let mut global_frame_config = FrameConfig::default();
     let mut output_path = String::new();
     let mut loop_count = 0;
+    let mut reverse_frames = false;
 
     // First pass: Global options
     let mut i = 1;
@@ -87,6 +88,10 @@ fn main() -> Result<()> {
                 global_frame_config.use_sharp_yuv = true;
                 parsed_args[i] = true;
             }
+            "-reverse" => {
+                reverse_frames = true;
+                parsed_args[i] = true;
+            }
             "-v" => {
                 options.verbose = true;
                 parsed_args[i] = true;
@@ -115,16 +120,18 @@ fn main() -> Result<()> {
                     i += 1;
                 }
             }
-            _ => {} // Ignore unknown global options for now
+            _ => {} 
         }
         i += 1;
     }
 
-    // Second pass: Frame options and files
-    let mut encoder: Option<AnimationEncoder> = None;
+    // Second pass: Collect files and frame configs
+    struct FrameJob {
+        path: String,
+        config: FrameConfig,
+    }
+    let mut jobs = Vec::new();
     let mut current_config = global_frame_config;
-    let mut pic_num = 0;
-    let mut timestamp_ms = 0;
 
     i = 1;
     while i < args.len() {
@@ -163,30 +170,48 @@ fn main() -> Result<()> {
                 }
             }
         } else {
-            // File
-            let img = read_image(arg).context(format!("Failed to read image: {}", arg))?;
-
-            if encoder.is_none() {
-                encoder = Some(AnimationEncoder::new(
-                    img.width() as i32,
-                    img.height() as i32,
-                    &options,
-                )?);
-            }
-
-            if let Some(enc) = &mut encoder {
-                if options.verbose {
-                    eprintln!(
-                        "Added frame #{} at time {} (file: {})",
-                        pic_num, timestamp_ms, arg
-                    );
-                }
-                enc.add_frame(&img, &current_config)?;
-                timestamp_ms += current_config.duration;
-                pic_num += 1;
-            }
+            jobs.push(FrameJob {
+                path: arg.clone(),
+                config: current_config.clone(),
+            });
         }
         i += 1;
+    }
+
+    if jobs.is_empty() {
+        eprintln!("No input file(s) for generating animation!");
+        Help();
+        return Ok(());
+    }
+
+    // APPLY REVERSE LOGIC
+    if reverse_frames {
+        jobs.reverse();
+    }
+
+    let mut encoder: Option<AnimationEncoder> = None;
+    let mut pic_num = 0;
+    let mut timestamp_ms = 0;
+
+    for job in jobs {
+        let img = read_image(&job.path).context(format!("Failed to read image: {}", job.path))?;
+
+        if encoder.is_none() {
+            let enc = AnimationEncoder::new(img.width() as i32, img.height() as i32, &options)?;
+            encoder = Some(enc);
+        }
+
+        if let Some(enc) = &mut encoder {
+            if options.verbose {
+                eprintln!(
+                    "Added frame #{} at time {} (file: {})",
+                    pic_num, timestamp_ms, job.path
+                );
+            }
+            enc.add_frame(&img, &job.config)?;
+            timestamp_ms += job.config.duration;
+            pic_num += 1;
+        }
     }
 
     if let Some(mut enc) = encoder {
@@ -200,9 +225,6 @@ fn main() -> Result<()> {
             eprintln!("[no output file specified]");
         }
         eprintln!("[{} frames, {} bytes].", pic_num, data.len());
-    } else {
-        eprintln!("No input file(s) for generating animation!");
-        Help();
     }
 
     Ok(())
@@ -220,6 +242,7 @@ fn Help() {
     println!(" -alpha_q <int> ....... alpha quality (0..100), default 100");
     println!(" -alpha_method <int> .. alpha compression method (0..1), default 1");
     println!(" -alpha_filter <int> .. alpha filtering method (0..2), default 1");
+    println!(" -reverse ............. reverse the order of input frames");
     println!(" -v ................... verbose mode");
     println!(" -h ................... this help\n");
     println!("Per-frame options:");

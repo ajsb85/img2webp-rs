@@ -1,31 +1,49 @@
 # Contributing to img2webp-rs
 
-We welcome contributions! Please follow these guidelines:
+We welcome contributions to this Enterprise Grade Rust migration! 
 
-1.  **Code Style**: Adhere to standard Rust formatting (`cargo fmt`).
-2.  **Commits**: Use descriptive, single-line subjects for commits. Provide more context in the body if necessary.
-3.  **Safety**: Since this project wraps a C library via FFI, ensure all `unsafe` blocks are well-documented and minimal.
-4.  **Tests**: Add tests for new features in the `webp_anim` crate.
+## Technical Philosophy
+- **Safety First**: Leverage Rust's ownership model to eliminate C-style buffer overflows and null pointer dereferences.
+- **Performance**: Use efficient FFI bindings and parallel processing where possible.
+- **Documentation**: All public APIs in `webp_anim` should be documented.
 
-## Automation with Makefile
+## Quality Control Workflow
 
-The project includes a `Makefile` to streamline development and deployment. 
+We use a `Makefile` to enforce standards across the project. Please use these commands before submitting a Pull Request:
 
-### Available Targets:
+### 1. Code Quality
+```bash
+make lint   # Automatically fix common lints and format code
+make check  # Run full lint check + test suite (Simulates CI)
+```
 
-- `make build`: Compiles the Rust workspace in release mode. Essential before running the tool or generating assets.
-- `make generate`: Re-generates all the WebP animation variants used in the benchmarks. It requires the `frames/` directory to be present.
-- `make test`: Runs the full Rust test suite.
-- `make deploy`: This is the standard procedure for updating the GitHub Pages site. It builds the tool, generates new animations, and pushes the results to the `main` branch.
-- `make release VERSION=vX.Y.Z`: Performs a full, secure release:
-    1. Builds the latest binary.
-    2. Creates a GPG-signed git tag.
-    3. Generates a GPG detached signature (`.asc`) for the binary.
-    4. Creates a GitHub release with both the binary and the signature.
-- `make clean`: Removes all build artifacts and generated WebP files to ensure a fresh state.
+### 2. Verification
+```bash
+make generate # Re-generate all benchmark animations to verify no visual regressions
+```
 
-## Process
+## Release & Deployment (Maintainers only)
 
-1. Fork the repo.
-2. Create a feature branch.
-3. Submit a Pull Request.
+### Updating the Live Demo
+To update the GitHub Pages site with new code or frames:
+```bash
+make deploy
+```
+
+### Publishing a New Version
+To perform a full, GPG-signed, multi-platform release:
+```bash
+make release VERSION=v1.0.0
+```
+This command:
+1.  Runs all quality checks.
+2.  Creates a **GPG-signed git tag**.
+3.  Pushes the tag to GitHub, triggering **GitHub Actions**.
+4.  GitHub Actions automatically builds and signs binaries for **Linux**, **Windows**, and **macOS** (x64).
+
+## Development Setup
+Ensure you have the following installed:
+- Rust (Stable)
+- `libwebp` development headers
+- `gh` CLI (GitHub CLI)
+- `gpg` (For signed releases)
