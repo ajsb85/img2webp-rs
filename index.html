@@ -130,6 +130,14 @@
             background-color: var(--color-canvas-subtle);
             margin-top: auto;
         }
+
+        .tech-box {
+            background-color: var(--color-canvas-default);
+            border-radius: 12px;
+            padding: 32px;
+            border: 1px solid var(--color-border-default);
+            box-shadow: var(--material-shadow);
+        }
     </style>
 </head>
 <body>
@@ -292,16 +300,73 @@
             </div>
         </div>
 
-        <div class="Subhead mt-8 mb-4">
-            <div class="Subhead-heading">System Integration</div>
-        </div>
-        <div class="markdown-body">
-            <p>Our benchmark interface is built with a hybrid design system combining the structure of <strong>Material Design</strong> with the aesthetic of <strong>GitHub Primer</strong>.</p>
-            <ul>
-                <li><strong>Elevation:</strong> Uses depth shadows to distinguish interactive elements.</li>
-                <li><strong>Theming:</strong> Fully synchronized with your system's light or dark mode.</li>
-                <li><strong>Functionality:</strong> Real-time toggle of backgrounds to verify transparency.</li>
-            </ul>
+        <!-- Technical Deep Dive Section -->
+        <div class="mt-8">
+            <div class="Subhead mb-4">
+                <div class="Subhead-heading">Technical Architecture & Benchmark Analysis</div>
+            </div>
+            
+            <div class="tech-box markdown-body">
+                <h3>1. Core Architecture: The Rust Migration</h3>
+                <p>
+                    The <code>img2webp-rs</code> utility represents a fundamental shift from the original C implementation to a memory-safe, enterprise-grade Rust workspace. The architecture is split into two specialized components:
+                </p>
+                <ul>
+                    <li><strong><code>webp_anim</code> (Core Library):</strong> A safe Rust abstraction layer over <code>libwebp-sys</code>. It manages the low-level FFI calls to the WebP Animation API, handling complex pointer orchestration, ABI versioning, and memory cleanup through Rust's <code>Drop</code> trait.</li>
+                    <li><strong><code>img2webp</code> (CLI Driver):</strong> A stateful command-line interface that implements a two-pass argument parser. This allows the tool to interleave frame-specific configurations (like quality and duration) with input files, exactly mimicking the original utility's behavior while adding modern safety.</li>
+                </ul>
+
+                <h3>2. Encoding Pipeline & Image Handling</h3>
+                <p>
+                    Unlike the original tool which relies on internal C decoders, <code>img2webp-rs</code> utilizes the high-performance <strong>Rust <code>image</code> crate</strong>. This enables support for a significantly broader range of source formats (BMP, TIFF, etc.) while ensuring that every pixel is processed through a safe, audited decoding pipeline before reaching the WebP encoder.
+                </p>
+
+                <h3>3. Advanced Parameter Logic</h3>
+                <p>
+                    The benchmarks above utilize several critical WebP features that we have exposed via the CLI:
+                </p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Technical Role</th>
+                            <th>Impact on Results</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>-exact</code></td>
+                            <td>RGB Preservation</td>
+                            <td>Prevents the encoder from zeroing out color data in Alpha=0 pixels. This is the difference between <strong>Pixel Perfect</strong> and <strong>Standard</strong> transparency.</td>
+                        </tr>
+                        <tr>
+                            <td><code>-alpha_filter</code></td>
+                            <td>Spatial Prediction</td>
+                            <td>Uses advanced algorithms (None, Fast, Best) to predict alpha values based on surrounding pixels, significantly reducing entropy in complex transparency masks.</td>
+                        </tr>
+                        <tr>
+                            <td><code>-m 6</code></td>
+                            <td>Search Complexity</td>
+                            <td>Enables the highest level of exhaustive search for the optimal bitstream representation. It results in the smallest files for a given quality level but requires significant CPU time.</td>
+                        </tr>
+                        <tr>
+                            <td><code>-near_lossless</code></td>
+                            <td>Pre-processing</td>
+                            <td>A perceptual filter that slightly modifies pixel values to make them more "compressible" without visible changes to the human eye.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>4. Benchmark Analysis</h3>
+                <p>
+                    The comparison results reveal a significant variance in efficiency:
+                </p>
+                <ul>
+                    <li><strong>Fidelity vs. Size:</strong> The <code>Pixel Perfect</code> version is the largest (~1.40 MB) because it stores "invisible" data. For production UI, this is often necessary to avoid interpolation artifacts.</li>
+                    <li><strong>The "Sweet Spot":</strong> The <code>Optimized Small</code> version (~203 KB) achieves an <strong>~85% reduction</strong> in size. This is accomplished by using <code>-mixed</code> mode, which allows the encoder to choose Lossy for complex textures and Lossless for sharp edges on a per-frame basis.</li>
+                    <li><strong>Low-Bandwidth Strategy:</strong> The <code>Lossy Low</code> version (~125 KB) demonstrates the floor of WebP animation. While artifacts are visible, it remains a viable option for massive image sequences in restricted environments.</li>
+                </ul>
+            </div>
         </div>
     </main>
 
@@ -309,7 +374,7 @@
         <div class="container-xl px-3 d-flex flex-justify-between flex-items-center">
             <div class="d-flex flex-items-center">
                 <svg height="24" class="octicon octicon-mark-github mr-3 color-fg-muted" viewBox="0 0 16 16" version="1.1" width="24"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
-                <span class="f6 color-fg-muted">&copy; 2026 img2webp-rs. Hybrid Design (Material + Primer).</span>
+                <span class="f6 color-fg-muted">&copy; 2026 img2webp-rs project. Hybrid Design (Material + Primer).</span>
             </div>
             <nav class="d-flex">
                 <a class="Link--secondary f6" href="https://github.com/ajsb85/img2webp-rs">Source Code</a>
