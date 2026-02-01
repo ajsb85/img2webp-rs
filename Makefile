@@ -33,6 +33,18 @@ test:
 	@echo "Running tests..."
 	@cd rs && cargo test
 
+# Quality Control: Linting and Formatting
+.PHONY: lint
+lint:
+	@echo "Running clippy..."
+	@cd rs && cargo clippy -- -D warnings
+	@echo "Checking formatting..."
+	@cd rs && cargo fmt --all -- --check
+
+# Comprehensive quality check
+.PHONY: check
+check: lint test
+
 # Clean build artifacts and generated images
 .PHONY: clean
 clean:
@@ -42,7 +54,7 @@ clean:
 
 # Deploy to GitHub Pages
 .PHONY: deploy
-deploy: generate
+deploy: check generate
 	@echo "Deploying to GitHub Pages..."
 	@git add .gitignore index.html .nojekyll $(OUTPUT_FILES)
 	@git commit -m "deploy: automated update via Makefile" || echo "No changes to commit"
@@ -55,6 +67,7 @@ deploy: generate
 release:
 	@if [ -z "$(VERSION)" ]; then echo "Error: VERSION is not set. Usage: make release VERSION=v1.2.3"; exit 1; fi
 	@echo "Preparing release $(VERSION)..."
+	@make check
 	@make build
 	@echo "Signing tag $(VERSION)..."
 	@git tag -s $(VERSION) -m "Release $(VERSION)"
@@ -75,7 +88,9 @@ help:
 	@echo "  make build           - Build the Rust tool"
 	@echo "  make generate        - Create all WebP animation variants"
 	@echo "  make test            - Run Rust tests"
-	@echo "  make deploy          - Generate assets and push to GitHub Pages"
+	@echo "  make lint            - Run clippy and format check"
+	@echo "  make check           - Run lint and tests (CI simulation)"
+	@echo "  make deploy          - Run check, generate assets, and push to GitHub Pages"
 	@echo "  make release VERSION=vX.Y.Z - Tag, sign, and publish a new release"
 	@echo "  make clean           - Remove build artifacts and generated WebP files"
 	@echo "  make all             - Build and generate (default)"
