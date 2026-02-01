@@ -19,7 +19,7 @@ fn main() -> Result<()> {
         }
         if arg == "-version" {
             println!("WebP Encoder version: (linked via libwebp-sys)");
-            println!("Rust img2webp 1.0.9");
+            println!("Rust img2webp 1.0.0");
             return Ok(());
         }
     }
@@ -30,7 +30,6 @@ fn main() -> Result<()> {
     let mut loop_count = 0;
     let mut reverse_frames = false;
     let mut ping_pong = false;
-    let mut swing_mode = false;
 
     // First pass: Global options
     let mut i = 1;
@@ -96,10 +95,6 @@ fn main() -> Result<()> {
             }
             "-pingpong" => {
                 ping_pong = true;
-                parsed_args[i] = true;
-            }
-            "-swing" => {
-                swing_mode = true;
                 parsed_args[i] = true;
             }
             "-v" => {
@@ -206,27 +201,6 @@ fn main() -> Result<()> {
             backward.pop();
         }
         jobs.extend(backward);
-    } else if swing_mode {
-        // REFINED SWING: Centered Pendulum Loop (True 50% Reach)
-        // Path: 0 -> 50% -> 0 -> -50% (Back-side 50%) -> 0
-        let n = jobs.len();
-        let peak = n / 2;
-        let mut sequence = Vec::new();
-
-        // 1. Center to +50% (Forward)
-        sequence.extend(jobs.iter().take(peak + 1).cloned());
-
-        // 2. +50% back to Center, then to -50% (Full 100% Sweep Backward)
-        for j in 1..=n {
-            let idx = (peak + n * 2 - j) % n;
-            sequence.push(jobs[idx].clone());
-        }
-        // 3. -50% back to Center (Forward)
-        for j in 1..peak {
-            let idx = (peak + j) % n;
-            sequence.push(jobs[idx].clone());
-        }
-        jobs = sequence;
     }
 
     let mut encoder: Option<AnimationEncoder> = None;

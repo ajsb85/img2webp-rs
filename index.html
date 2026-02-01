@@ -198,7 +198,7 @@
     <main class="container-xl px-3 pt-6 pb-8">
         <div class="Subhead mb-4 border-bottom-0">
             <div class="Subhead-heading f0-light">Transparency Showcase</div>
-            <div class="Subhead-description f3">Benchmarks of 10 distinct encoding strategies for optimized transparent animated assets.</div>
+            <div class="Subhead-description f3">Benchmarks of 9 distinct encoding strategies including temporal sequence manipulation.</div>
         </div>
 
         <div class="benchmark-grid">
@@ -209,7 +209,7 @@
                 </div>
                 <div class="Box-body p-4">
                     <h3 class="f4 mb-2">Standard</h3>
-                    <p class="color-fg-muted f6">Industry baseline lossless. Balanced, but may zero-out "invisible" RGB data.</p>
+                    <p class="color-fg-muted f6">Industry standard lossless. Balanced, but may zero-out "invisible" RGB data.</p>
                     <div class="stats-badge mt-3">1.31 MB</div>
                 </div>
                 <div class="card-footer"><code class="f6 color-fg-muted">Default</code></div>
@@ -228,33 +228,20 @@
                 <div class="card-footer"><code class="f6 color-fg-muted">-lossless -exact</code></div>
             </div>
 
-            <!-- 3. Swing Loop -->
+            <!-- 3. Backward Sequence -->
             <div class="Box Box--benchmark border-accent shadow-medium">
-                <div class="preview-stage checkered">
-                    <img src="animated_swing.webp" class="benchmark-img">
-                </div>
-                <div class="Box-body p-4">
-                    <h3 class="f4 mb-2 color-fg-accent">Swing Loop</h3>
-                    <p class="color-fg-muted f6">0 to 50% then 100% backward. A complex temporal loop for smooth teases.</p>
-                    <div class="stats-badge color-bg-accent-emphasis color-fg-on-emphasis mt-3" style="border:none">1.98 MB</div>
-                </div>
-                <div class="card-footer"><code class="f6 color-fg-muted">-swing</code></div>
-            </div>
-
-            <!-- 4. Backward Sequence -->
-            <div class="Box Box--benchmark">
                 <div class="preview-stage checkered">
                     <img src="animated_backward.webp" class="benchmark-img">
                 </div>
                 <div class="Box-body p-4">
-                    <h3 class="f4 mb-2">Backward Sequence</h3>
+                    <h3 class="f4 mb-2 color-fg-accent">Backward Sequence</h3>
                     <p class="color-fg-muted f6">Last frame first, first frame last. Reverses the entire temporal flow.</p>
-                    <div class="stats-badge mt-3">1.31 MB</div>
+                    <div class="stats-badge color-bg-accent-emphasis color-fg-on-emphasis mt-3" style="border:none">1.31 MB</div>
                 </div>
                 <div class="card-footer"><code class="f6 color-fg-muted">-reverse</code></div>
             </div>
 
-            <!-- 5. Ping-Pong Loop -->
+            <!-- 4. Ping-Pong Loop -->
             <div class="Box Box--benchmark">
                 <div class="preview-stage checkered">
                     <img src="animated_pingpong.webp" class="benchmark-img">
@@ -267,7 +254,7 @@
                 <div class="card-footer"><code class="f6 color-fg-muted">-pingpong</code></div>
             </div>
 
-            <!-- 6. Optimized Small -->
+            <!-- 5. Optimized Small -->
             <div class="Box Box--benchmark">
                 <div class="preview-stage checkered">
                     <img src="animated_small.webp" class="benchmark-img">
@@ -278,6 +265,19 @@
                     <div class="stats-badge mt-3">203 KB</div>
                 </div>
                 <div class="card-footer"><code class="f6 color-fg-muted">-mixed -alpha_q 50</code></div>
+            </div>
+
+            <!-- 6. Near Lossless -->
+            <div class="Box Box--benchmark">
+                <div class="preview-stage checkered">
+                    <img src="animated_near_lossless60.webp" class="benchmark-img">
+                </div>
+                <div class="Box-body p-4">
+                    <h3 class="f4 mb-2">Near Lossless</h3>
+                    <p class="color-fg-muted f6">Perceptual preprocessing that yielding significant bitstream compression.</p>
+                    <div class="stats-badge mt-3">895 KB</div>
+                </div>
+                <div class="card-footer"><code class="f6 color-fg-muted">-near_lossless 60</code></div>
             </div>
 
             <!-- 7. Extreme Slow -->
@@ -293,20 +293,7 @@
                 <div class="card-footer"><code class="f6 color-fg-muted">-m 6 -alpha_filter 2</code></div>
             </div>
 
-            <!-- 8. Near Lossless -->
-            <div class="Box Box--benchmark">
-                <div class="preview-stage checkered">
-                    <img src="animated_near_lossless60.webp" class="benchmark-img">
-                </div>
-                <div class="Box-body p-4">
-                    <h3 class="f4 mb-2">Near Lossless</h3>
-                    <p class="color-fg-muted f6">Perceptual preprocessing that yielding significant bitstream compression.</p>
-                    <div class="stats-badge mt-3">895 KB</div>
-                </div>
-                <div class="card-footer"><code class="f6 color-fg-muted">-near_lossless 60</code></div>
-            </div>
-
-            <!-- 9. Lossy Sharp -->
+            <!-- 8. Lossy Sharp -->
             <div class="Box Box--benchmark">
                 <div class="preview-stage checkered">
                     <img src="animated_lossy.webp" class="benchmark-img">
@@ -319,7 +306,7 @@
                 <div class="card-footer"><code class="f6 color-fg-muted">-lossy -q 75 -sharp_yuv</code></div>
             </div>
 
-            <!-- 10. Lossy Low -->
+            <!-- 9. Lossy Low -->
             <div class="Box Box--benchmark">
                 <div class="preview-stage checkered">
                     <img src="animated_lossy_low.webp" class="benchmark-img">
@@ -345,13 +332,13 @@
                         <h3>Modular Workspace & FFI Layer</h3>
                         <p>The <code>img2webp-rs</code> architecture separates concerns into a decoupled multi-crate workspace:</p>
                         <ul>
-                            <li><strong>webp_anim (Core Library):</strong> A safe Rust abstraction over <code>libwebp-sys</code>. It manages the full lifecycle of C-allocated muxer objects using Rust's RAII patterns and automated memory cleanup via the <code>Drop</code> trait.</li>
+                            <li><strong>webp_anim (Library):</strong> A safe Rust abstraction over <code>libwebp-sys</code>. It manages the full lifecycle of C-allocated muxer objects using Rust's RAII patterns and automated memory cleanup via the <code>Drop</code> trait.</li>
                             <li><strong>img2webp (CLI Driver):</strong> A stateful command-line interface featuring a non-linear two-pass argument parser. This enables the ability to interleave frame-specific configurations (quality, duration) with sequence inputs.</li>
                         </ul>
                     </div>
                     <div>
                         <h3>Temporal Manipulation Engine</h3>
-                        <p>A primary enhancement in <code>img2webp-rs</code> is the <strong>Stateful Job Queue</strong>. Unlike standard C converters, we buffer the entire encoding plan, allowing flags like <code>-reverse</code>, <code>-pingpong</code>, and <code>-swing</code> to manipulate the temporal sequence before the expensive encoding logic begins.</p>
+                        <p>A primary enhancement in <code>img2webp-rs</code> is the <strong>Stateful Job Queue</strong>. Unlike standard C converters, we buffer the entire encoding plan, allowing flags like <code>-reverse</code> and <code>-pingpong</code> to manipulate the temporal sequence before the expensive encoding logic begins.</p>
                     </div>
                 </div>
 
@@ -420,7 +407,7 @@
             const idMap = { 'checkered': 'btn-checkered', 'image-bg': 'btn-image', 'solid-bg': 'btn-dark', 'black-bg': 'btn-black' };
             const active = document.getElementById(idMap[cls]);
             if (active) active.classList.add('btn-primary');
-            showFlash(`Context: ${cls.toUpperCase()}`);
+            showFlash(`Preview updated: ${cls.toUpperCase()}`);
         }
 
         function setRendering(cls) {
