@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebP Transparent Animation Deep Dive</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 { color: #333; }
+        .controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+        }
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+        .card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .demo-container {
+            position: relative;
+            height: 300px;
+            border: 2px solid #333;
+            border-radius: 4px;
+            overflow: hidden;
+            background-size: 20px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        /* Background Types */
+        .checkered {
+            background-image:
+                linear-gradient(45deg, #ccc 25%, transparent 25%),
+                linear-gradient(-45deg, #ccc 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #ccc 75%),
+                linear-gradient(-45deg, transparent 75%, #ccc 75%);
+            background-size: 40px 40px;
+            background-position: 0 0, 0 20px, 20px -20px, -20px 0px;
+        }
+        .image-bg {
+            background-image: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80');
+            background-size: cover;
+        }
+        .solid-bg { background: #2c3e50; }
+        .black-bg { background: #000000; }
+        
+        img { max-width: 100%; height: auto; display: block; }
+        .pixelated { image-rendering: pixelated; }
+        
+        .stats {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #666;
+            background: #f9f9f9;
+            padding: 5px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>WebP Animation Optimization Benchmarks</h1>
+
+    <div class="controls">
+        <label>Background: </label>
+        <button onclick="setBg('checkered')">Checkered</button>
+        <button onclick="setBg('image-bg')">Nature</button>
+        <button onclick="setBg('solid-bg')">Solid Dark</button>
+        <button onclick="setBg('black-bg')">Solid Black</button>
+        |
+        <label>Rendering: </label>
+        <button onclick="setRendering('smooth')">Smooth</button>
+        <button onclick="setRendering('pixelated')">Pixel Perfect</button>
+    </div>
+
+    <div class="demo-grid">
+        <div class="card">
+            <h3>Standard</h3>
+            <div class="demo-container checkered"><img src="animated.webp"></div>
+            <div class="stats">Size: ~1.26 MB<br>Flags: Default (Lossless)</div>
+        </div>
+
+        <div class="card">
+            <h3>Pixel Perfect</h3>
+            <div class="demo-container checkered"><img src="animated_perfect.webp"></div>
+            <div class="stats">Size: ~1.33 MB<br>Flags: <code>-lossless -exact</code></div>
+        </div>
+
+        <div class="card">
+            <h3>Extreme Slow (M6)</h3>
+            <div class="demo-container checkered"><img src="animated_slowest.webp"></div>
+            <div class="stats">Size: ~1.32 MB<br>Flags: <code>-m 6 -alpha_filter 2 -exact</code></div>
+        </div>
+
+        <div class="card">
+            <h3>Optimized Small</h3>
+            <div class="demo-container checkered"><img src="animated_small.webp"></div>
+            <div class="stats">Size: ~206 KB<br>Flags: <code>-min_size -mixed -alpha_q 50</code></div>
+        </div>
+
+        <div class="card">
+            <h3>Lossy Sharp</h3>
+            <div class="demo-container checkered"><img src="animated_lossy.webp"></div>
+            <div class="stats">Size: ~216 KB<br>Flags: <code>-lossy -q 75 -sharp_yuv</code></div>
+        </div>
+    </div>
+
+    <div style="margin-top: 40px; max-width: 800px; background: white; padding: 20px; border-radius: 8px;">
+        <h2>Deep Dive: Optimization Matrix</h2>
+        <p>By exploring the <code>WebPConfig</code> headers and the <code>libwebp</code> implementation, we identified several advanced optimization vectors:</p>
+        <ul>
+            <li><strong>Alpha Compression Method (<code>alpha_compression</code>):</strong> Switches between no compression (0) and lossless compression (1) for the alpha channel. Our tool now exposes this.</li>
+            <li><strong>Alpha Filtering (<code>alpha_filter</code>):</strong> 0=None, 1=Fast, 2=Best. "Best" uses complex predictive filtering that significantly improves compression of smooth alpha gradients.</li>
+            <li><strong>Method (<code>-m 0-6</code>):</strong> Controls the complexity of the compression search. Level 6 is the "Enterprise Grade" setting for maximum compression, though significantly slower to encode.</li>
+            <li><strong>Sharp YUV (<code>-sharp_yuv</code>):</strong> A more accurate RGB to YUV conversion that reduces artifacts at high-contrast edges, specifically targeting "ghosting" or "halos" in lossy animations.</li>
+            <li><strong>Mixed Mode (<code>-mixed</code>):</strong> Allows the encoder to decide frame-by-frame whether lossless or lossy is better, often achieving the best quality-to-size ratio.</li>
+        </ul>
+    </div>
+
+    <script>
+        function setBg(cls) {
+            document.querySelectorAll('.demo-container').forEach(el => {
+                el.className = 'demo-container ' + cls;
+            });
+        }
+        function setRendering(cls) {
+            document.querySelectorAll('img').forEach(el => {
+                el.className = cls;
+            });
+        }
+    </script>
+</body>
+</html>

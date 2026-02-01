@@ -1,0 +1,8 @@
+/target
+/rs/target
+**/*.rs.bk
+.DS_Store
+animated*.webp
+node_modules
+.env
+libwebp/
