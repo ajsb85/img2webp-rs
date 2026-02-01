@@ -11,8 +11,19 @@
     <style>
         :root {
             --card-radius: 12px;
-            --material-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08);
-            --material-shadow-hover: 0 10px 20px rgba(0,0,0,0.1), 0 6px 6px rgba(0,0,0,0.05);
+            /* Material 3 inspired elevation */
+            --shadow-1: 0 1px 2px rgba(0,0,0,0.1);
+            --shadow-2: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            --shadow-3: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            
+            /* High-contrast checkered pattern colors */
+            --checkered-light: #ffffff;
+            --checkered-dark: #e1e4e8;
+        }
+
+        [data-color-mode="dark"] :root {
+            --checkered-light: #161b22;
+            --checkered-dark: #30363d;
         }
 
         body {
@@ -24,56 +35,57 @@
 
         .Header {
             background-color: var(--color-header-bg);
-            color: var(--color-header-text);
-            padding: 16px 0;
             border-bottom: 1px solid var(--color-border-default);
         }
 
-        /* Hybrid Card Style: Material Structure + Primer Aesthetics */
+        /* Hybrid Card: Material Depth + Primer Precision */
         .Box--benchmark {
+            background-color: var(--color-canvas-default);
             border-radius: var(--card-radius) !important;
             border: 1px solid var(--color-border-default);
-            box-shadow: var(--material-shadow);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-2);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             height: 100%;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            background-color: var(--color-canvas-default);
         }
 
         .Box--benchmark:hover {
-            box-shadow: var(--material-shadow-hover);
-            transform: translateY(-4px);
+            box-shadow: var(--shadow-3);
+            transform: translateY(-6px);
             border-color: var(--color-accent-emphasis);
         }
 
-        /* Benchmark Preview Area */
-        .preview-container {
+        /* Benchmark Preview: The Transparency Stage */
+        .preview-stage {
             position: relative;
-            height: 240px;
+            height: 260px;
             display: flex;
             justify-content: center;
             align-items: center;
             background-color: var(--color-canvas-inset);
             overflow: hidden;
-            background-size: 20px 20px;
-            transition: background 0.3s ease;
+            border-bottom: 1px solid var(--color-border-muted);
+            transition: all 0.4s ease;
         }
 
-        /* Transparency Backgrounds */
+        /* FIX: Robust Checkered Background */
         .checkered {
-            background-image:
-                linear-gradient(45deg, var(--color-border-muted) 25%, transparent 25%),
-                linear-gradient(-45deg, var(--color-border-muted) 25%, transparent 25%),
-                linear-gradient(45deg, transparent 75%, var(--color-border-muted) 75%),
-                linear-gradient(-45deg, transparent 75%, var(--color-border-muted) 75%);
-            background-size: 40px 40px;
-            background-position: 0 0, 0 20px, 20px -20px, -20px 0px;
+            background-color: var(--checkered-light);
+            background-image: 
+                linear-gradient(45deg, var(--checkered-dark) 25%, transparent 25%), 
+                linear-gradient(-45deg, var(--checkered-dark) 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, var(--checkered-dark) 75%), 
+                linear-gradient(-45deg, transparent 75%, var(--checkered-dark) 75%);
+            background-size: 32px 32px;
+            background-position: 0 0, 0 16px, 16px -16px, -16px 0px;
         }
+
         .image-bg {
             background-image: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80');
             background-size: cover;
+            background-position: center;
         }
         .solid-bg { background-color: var(--color-neutral-emphasis-plus); }
         .black-bg { background-color: #000000; }
@@ -82,18 +94,21 @@
             max-width: 85%;
             max-height: 85%;
             object-fit: contain;
-            display: block;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15));
+            transition: transform 0.3s ease;
         }
 
         .pixelated { image-rendering: pixelated; }
 
-        .stats-badge {
+        /* Meta components */
+        .stats-pill {
             display: inline-flex;
             align-items: center;
             padding: 4px 12px;
-            background: var(--color-canvas-subtle);
-            border: 1px solid var(--color-border-default);
-            border-radius: 6px;
+            background: var(--color-accent-subtle);
+            color: var(--color-accent-fg);
+            border: 1px solid var(--color-accent-border);
+            border-radius: 100px;
             font-size: 12px;
             font-family: var(--fontStack-monospace);
             font-weight: 600;
@@ -106,14 +121,21 @@
             background-color: var(--color-canvas-default);
             border-bottom: 1px solid var(--color-border-default);
             padding: 12px 0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            box-shadow: var(--shadow-1);
         }
 
         .benchmark-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
             gap: 32px;
-            padding: 24px 0;
+            padding: 32px 0;
+        }
+
+        .card-footer {
+            padding: 12px 16px;
+            background-color: var(--color-canvas-subtle);
+            border-top: 1px solid var(--color-border-muted);
+            margin-top: auto;
         }
 
         .flash-container {
@@ -121,22 +143,14 @@
             top: 80px;
             right: 24px;
             z-index: 1000;
-            min-width: 300px;
+            pointer-events: none;
         }
 
-        .card-footer {
-            padding: 12px 16px;
-            border-top: 1px solid var(--color-border-muted);
-            background-color: var(--color-canvas-subtle);
-            margin-top: auto;
-        }
-
-        .tech-box {
+        .tech-card {
             background-color: var(--color-canvas-default);
-            border-radius: 12px;
-            padding: 32px;
+            border-radius: 16px;
             border: 1px solid var(--color-border-default);
-            box-shadow: var(--material-shadow);
+            box-shadow: var(--shadow-2);
         }
     </style>
 </head>
@@ -152,9 +166,9 @@
             </div>
             <div class="Header-item Header-item--full">
                 <nav class="d-flex">
-                    <a class="Header-link mr-3" href="https://github.com/ajsb85/img2webp-rs">Repository</a>
+                    <a class="Header-link mr-3" href="https://github.com/ajsb85/img2webp-rs">Source</a>
                     <a class="Header-link mr-3" href="https://github.com/ajsb85/img2webp-rs/releases">Releases</a>
-                    <a class="Header-link" href="#">Benchmarks</a>
+                    <a class="Header-link" href="#">Documentation</a>
                 </nav>
             </div>
             <div class="Header-item mr-0">
@@ -168,17 +182,17 @@
     <div class="sticky-toolbar">
         <div class="container-xl px-3 d-flex flex-items-center flex-justify-between flex-wrap">
             <div class="d-flex flex-items-center mr-4 py-2">
-                <span class="text-bold f6 color-fg-muted mr-3">CANVAS BACKGROUND</span>
+                <span class="text-bold f6 color-fg-muted mr-3">PREVIEW CONTEXT</span>
                 <div class="BtnGroup">
                     <button class="btn BtnGroup-item btn-sm" type="button" onclick="setBg('checkered')" id="btn-checkered">Checkered</button>
                     <button class="btn BtnGroup-item btn-sm" type="button" onclick="setBg('image-bg')" id="btn-image">Nature</button>
-                    <button class="btn BtnGroup-item btn-sm" type="button" onclick="setBg('solid-bg')" id="btn-dark">Solid Dark</button>
-                    <button class="btn BtnGroup-item btn-sm" type="button" onclick="setBg('black-bg')" id="btn-black">Black</button>
+                    <button class="btn BtnGroup-item btn-sm" type="button" onclick="setBg('solid-bg')" id="btn-dark">Dark Blue</button>
+                    <button class="btn BtnGroup-item btn-sm" type="button" onclick="setBg('black-bg')" id="btn-black">Solid Black</button>
                 </div>
             </div>
             
             <div class="d-flex flex-items-center py-2">
-                <span class="text-bold f6 color-fg-muted mr-3">RENDERING</span>
+                <span class="text-bold f6 color-fg-muted mr-3">ENGINE</span>
                 <div class="BtnGroup">
                     <button class="btn BtnGroup-item btn-sm" type="button" onclick="setRendering('smooth')" id="btn-smooth">Standard</button>
                     <button class="btn BtnGroup-item btn-sm" type="button" onclick="setRendering('pixelated')" id="btn-pixel">Pixel Perfect</button>
@@ -188,21 +202,21 @@
     </div>
 
     <main class="container-xl px-3 pt-6 pb-8">
-        <div class="Subhead mb-4">
-            <div class="Subhead-heading f0-light">Optimization Benchmarks</div>
-            <div class="Subhead-description">Comparing 7 distinct encoding strategies for transparent WebP animations.</div>
+        <div class="Subhead mb-4 border-bottom-0">
+            <div class="Subhead-heading f0-light">Transparency Optimization</div>
+            <div class="Subhead-description">A deep-dive comparison of 7 encoding strategies for animated transparent assets.</div>
         </div>
 
         <div class="benchmark-grid">
             <!-- 1. Standard -->
             <div class="Box Box--benchmark">
-                <div class="preview-container checkered">
+                <div class="preview-stage checkered">
                     <img src="animated.webp" class="benchmark-img">
                 </div>
                 <div class="Box-body p-4">
                     <h3 class="f4 mb-2">Standard</h3>
-                    <p class="color-fg-muted f6">The baseline baseline behavior. Reliable industry standard.</p>
-                    <div class="stats-badge mt-3">1.31 MB</div>
+                    <p class="color-fg-muted f6">Industry baseline. Efficient but may discard "invisible" RGB data.</p>
+                    <div class="stats-pill mt-3">1.31 MB</div>
                 </div>
                 <div class="card-footer">
                     <code class="f6 color-fg-muted">Default</code>
@@ -211,13 +225,13 @@
 
             <!-- 2. Pixel Perfect -->
             <div class="Box Box--benchmark">
-                <div class="preview-container checkered">
+                <div class="preview-stage checkered">
                     <img src="animated_perfect.webp" class="benchmark-img">
                 </div>
                 <div class="Box-body p-4">
                     <h3 class="f4 mb-2">Pixel Perfect</h3>
-                    <p class="color-fg-muted f6">Preserves RGB data in Alpha=0 pixels to prevent edge bleeding.</p>
-                    <div class="stats-badge mt-3">1.40 MB</div>
+                    <p class="color-fg-muted f6">Preserves raw RGB data even at 0% Alpha. Zero color bleeding.</p>
+                    <div class="stats-pill mt-3">1.40 MB</div>
                 </div>
                 <div class="card-footer">
                     <code class="f6 color-fg-muted">-lossless -exact</code>
@@ -226,13 +240,13 @@
 
             <!-- 3. Extreme Slow -->
             <div class="Box Box--benchmark">
-                <div class="preview-container checkered">
+                <div class="preview-stage checkered">
                     <img src="animated_slowest.webp" class="benchmark-img">
                 </div>
                 <div class="Box-body p-4">
                     <h3 class="f4 mb-2">Extreme Slow</h3>
-                    <p class="color-fg-muted f6">Maximum exhaustive search (M6) for the smallest possible bitstream.</p>
-                    <div class="stats-badge mt-3">1.38 MB</div>
+                    <p class="color-fg-muted f6">CPU-intensive search (M6) for the absolute smallest bitstream.</p>
+                    <div class="stats-pill mt-3">1.38 MB</div>
                 </div>
                 <div class="card-footer">
                     <code class="f6 color-fg-muted">-m 6 -alpha_filter 2</code>
@@ -241,13 +255,13 @@
 
             <!-- 4. Optimized Small -->
             <div class="Box Box--benchmark border-accent shadow-medium">
-                <div class="preview-container checkered">
+                <div class="preview-stage checkered">
                     <img src="animated_small.webp" class="benchmark-img">
                 </div>
                 <div class="Box-body p-4">
                     <h3 class="f4 mb-2 color-fg-accent">Optimized Small</h3>
-                    <p class="color-fg-muted f6">Mixed-mode with reduced alpha quality. Recommended for web assets.</p>
-                    <div class="stats-badge color-bg-accent-emphasis color-fg-on-emphasis mt-3">203 KB</div>
+                    <p class="color-fg-muted f6">The sweet spot. Mixed mode with intelligent alpha optimization.</p>
+                    <div class="stats-pill color-bg-accent-emphasis color-fg-on-emphasis mt-3" style="border:none">203 KB</div>
                 </div>
                 <div class="card-footer">
                     <code class="f6 color-fg-muted">-mixed -alpha_q 50</code>
@@ -256,13 +270,13 @@
 
             <!-- 5. Near Lossless -->
             <div class="Box Box--benchmark">
-                <div class="preview-container checkered">
+                <div class="preview-stage checkered">
                     <img src="animated_near_lossless60.webp" class="benchmark-img">
                 </div>
                 <div class="Box-body p-4">
                     <h3 class="f4 mb-2">Near Lossless</h3>
-                    <p class="color-fg-muted f6">Perceptual optimization that alters pixels for high compression ratios.</p>
-                    <div class="stats-badge mt-3">895 KB</div>
+                    <p class="color-fg-muted f6">Subtle pixel pre-processing for massive compression gains.</p>
+                    <div class="stats-pill mt-3">895 KB</div>
                 </div>
                 <div class="card-footer">
                     <code class="f6 color-fg-muted">-near_lossless 60</code>
@@ -271,13 +285,13 @@
 
             <!-- 6. Lossy Sharp -->
             <div class="Box Box--benchmark">
-                <div class="preview-container checkered">
+                <div class="preview-stage checkered">
                     <img src="animated_lossy.webp" class="benchmark-img">
                 </div>
                 <div class="Box-body p-4">
                     <h3 class="f4 mb-2">Lossy Sharp</h3>
-                    <p class="color-fg-muted f6">High contrast preservation using Sharp YUV conversion.</p>
-                    <div class="stats-badge mt-3">209 KB</div>
+                    <p class="color-fg-muted f6">High-contrast preservation using Sharp YUV algorithm.</p>
+                    <div class="stats-pill mt-3">209 KB</div>
                 </div>
                 <div class="card-footer">
                     <code class="f6 color-fg-muted">-lossy -q 75 -sharp_yuv</code>
@@ -286,13 +300,13 @@
 
             <!-- 7. Lossy Low -->
             <div class="Box Box--benchmark">
-                <div class="preview-container checkered">
+                <div class="preview-stage checkered">
                     <img src="animated_lossy_low.webp" class="benchmark-img">
                 </div>
                 <div class="Box-body p-4">
                     <h3 class="f4 mb-2">Lossy Low</h3>
-                    <p class="color-fg-muted f6">Minimal footprint for bandwidth-starved environments.</p>
-                    <div class="stats-badge mt-3">125 KB</div>
+                    <p class="color-fg-muted f6">Bandwidth-first strategy. High artifacts, minimal footprint.</p>
+                    <div class="stats-pill mt-3">125 KB</div>
                 </div>
                 <div class="card-footer">
                     <code class="f6 color-fg-muted">-q 30 -alpha_q 30</code>
@@ -300,84 +314,45 @@
             </div>
         </div>
 
-        <!-- Technical Deep Dive Section -->
         <div class="mt-8">
-            <div class="Subhead mb-4">
-                <div class="Subhead-heading">Technical Architecture & Benchmark Analysis</div>
+            <div class="Subhead mb-4 border-bottom-0">
+                <div class="Subhead-heading">Technical Architecture</div>
             </div>
             
-            <div class="tech-box markdown-body">
-                <h3>1. Core Architecture: The Rust Migration</h3>
-                <p>
-                    The <code>img2webp-rs</code> utility represents a fundamental shift from the original C implementation to a memory-safe, enterprise-grade Rust workspace. The architecture is split into two specialized components:
-                </p>
+            <div class="tech-card p-6 markdown-body">
+                <h3>High-Level Design</h3>
+                <p>The <code>img2webp-rs</code> architecture bridges the gap between low-level performance and high-level safety. Built using a modular Rust workspace, it separates concerns into a core encoding engine and a robust CLI driver.</p>
+                
+                <div class="d-flex flex-column flex-md-row gap-4 mt-4">
+                    <div class="Box p-4 flex-1 shadow-sm">
+                        <h4 class="mb-2">webp_anim (Library)</h4>
+                        <p class="f6 color-fg-muted">Safe abstraction over <code>libwebp-sys</code>. Manages complex pointer math, memory safety, and ABI synchronization.</p>
+                    </div>
+                    <div class="Box p-4 flex-1 shadow-sm">
+                        <h4 class="mb-2">img2webp (CLI)</h4>
+                        <p class="f6 color-fg-muted">Stateful 2-pass parser that allows per-frame configuration of quality, duration, and method search effort.</p>
+                    </div>
+                </div>
+
+                <h3 class="mt-6">Key Optimization Vectors</h3>
                 <ul>
-                    <li><strong><code>webp_anim</code> (Core Library):</strong> A safe Rust abstraction layer over <code>libwebp-sys</code>. It manages the low-level FFI calls to the WebP Animation API, handling complex pointer orchestration, ABI versioning, and memory cleanup through Rust's <code>Drop</code> trait.</li>
-                    <li><strong><code>img2webp</code> (CLI Driver):</strong> A stateful command-line interface that implements a two-pass argument parser. This allows the tool to interleave frame-specific configurations (like quality and duration) with input files, exactly mimicking the original utility's behavior while adding modern safety.</li>
-                </ul>
-
-                <h3>2. Encoding Pipeline & Image Handling</h3>
-                <p>
-                    Unlike the original tool which relies on internal C decoders, <code>img2webp-rs</code> utilizes the high-performance <strong>Rust <code>image</code> crate</strong>. This enables support for a significantly broader range of source formats (BMP, TIFF, etc.) while ensuring that every pixel is processed through a safe, audited decoding pipeline before reaching the WebP encoder.
-                </p>
-
-                <h3>3. Advanced Parameter Logic</h3>
-                <p>
-                    The benchmarks above utilize several critical WebP features that we have exposed via the CLI:
-                </p>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Parameter</th>
-                            <th>Technical Role</th>
-                            <th>Impact on Results</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><code>-exact</code></td>
-                            <td>RGB Preservation</td>
-                            <td>Prevents the encoder from zeroing out color data in Alpha=0 pixels. This is the difference between <strong>Pixel Perfect</strong> and <strong>Standard</strong> transparency.</td>
-                        </tr>
-                        <tr>
-                            <td><code>-alpha_filter</code></td>
-                            <td>Spatial Prediction</td>
-                            <td>Uses advanced algorithms (None, Fast, Best) to predict alpha values based on surrounding pixels, significantly reducing entropy in complex transparency masks.</td>
-                        </tr>
-                        <tr>
-                            <td><code>-m 6</code></td>
-                            <td>Search Complexity</td>
-                            <td>Enables the highest level of exhaustive search for the optimal bitstream representation. It results in the smallest files for a given quality level but requires significant CPU time.</td>
-                        </tr>
-                        <tr>
-                            <td><code>-near_lossless</code></td>
-                            <td>Pre-processing</td>
-                            <td>A perceptual filter that slightly modifies pixel values to make them more "compressible" without visible changes to the human eye.</td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <h3>4. Benchmark Analysis</h3>
-                <p>
-                    The comparison results reveal a significant variance in efficiency:
-                </p>
-                <ul>
-                    <li><strong>Fidelity vs. Size:</strong> The <code>Pixel Perfect</code> version is the largest (~1.40 MB) because it stores "invisible" data. For production UI, this is often necessary to avoid interpolation artifacts.</li>
-                    <li><strong>The "Sweet Spot":</strong> The <code>Optimized Small</code> version (~203 KB) achieves an <strong>~85% reduction</strong> in size. This is accomplished by using <code>-mixed</code> mode, which allows the encoder to choose Lossy for complex textures and Lossless for sharp edges on a per-frame basis.</li>
-                    <li><strong>Low-Bandwidth Strategy:</strong> The <code>Lossy Low</code> version (~125 KB) demonstrates the floor of WebP animation. While artifacts are visible, it remains a viable option for massive image sequences in restricted environments.</li>
+                    <li><strong>-exact Preservation:</strong> Essential for professional UI. Prevents the common "dark fringe" issue by keeping RGB data in transparent areas.</li>
+                    <li><strong>Alpha Prediction:</strong> Using <code>alpha_filter="best"</code> reduces the entropy of transparency masks, yielding smaller files without losing quality.</li>
+                    <li><strong>M6 Search:</strong> The highest complexity setting for the WebP search algorithm, ensuring the absolute most efficient bitstream representation.</li>
                 </ul>
             </div>
         </div>
     </main>
 
-    <footer class="footer mt-auto py-6 border-top color-bg-subtle">
-        <div class="container-xl px-3 d-flex flex-justify-between flex-items-center">
-            <div class="d-flex flex-items-center">
+    <footer class="footer mt-auto py-8 border-top color-bg-subtle">
+        <div class="container-xl px-3 d-flex flex-column flex-md-row flex-justify-between flex-items-center">
+            <div class="d-flex flex-items-center mb-4 mb-md-0">
                 <svg height="24" class="octicon octicon-mark-github mr-3 color-fg-muted" viewBox="0 0 16 16" version="1.1" width="24"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
-                <span class="f6 color-fg-muted">&copy; 2026 img2webp-rs project. Hybrid Design (Material + Primer).</span>
+                <span class="f6 color-fg-muted">&copy; 2026 img2webp-rs. Architecture by ajsb85.</span>
             </div>
             <nav class="d-flex">
-                <a class="Link--secondary f6" href="https://github.com/ajsb85/img2webp-rs">Source Code</a>
+                <a class="Link--secondary f6 mr-4" href="https://github.com/ajsb85/img2webp-rs">Source Code</a>
+                <a class="Link--secondary f6" href="https://github.com/ajsb85/img2webp-rs/releases">Latest Release</a>
             </nav>
         </div>
     </footer>
@@ -386,29 +361,32 @@
         function showFlash(message) {
             const container = document.getElementById('flash-container');
             const flash = document.createElement('div');
-            flash.className = 'flash flash-success mb-3 shadow-sm anim-fade-in';
-            flash.style.borderRadius = '8px';
+            flash.className = 'flash flash-success mb-3 shadow-medium anim-fade-in p-3 border-accent';
+            flash.style.borderRadius = '12px';
+            flash.style.background = 'var(--color-canvas-default)';
             flash.innerHTML = `
-                <svg class="octicon octicon-check" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>
-                ${message}
+                <div class="d-flex flex-items-center">
+                    <svg class="octicon octicon-check mr-2 color-fg-success" viewBox="0 0 16 16" version="1.1" width="16" height="16"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>
+                    <span class="f5 text-bold">${message}</span>
+                </div>
             `;
             container.appendChild(flash);
             setTimeout(() => { 
                 flash.style.opacity = '0'; 
-                flash.style.transform = 'translateX(20px)';
+                flash.style.transform = 'translateY(-10px)';
                 setTimeout(() => flash.remove(), 500); 
-            }, 2000);
+            }, 2500);
         }
 
         function setBg(cls) {
-            document.querySelectorAll('.preview-container').forEach(el => {
-                el.className = 'preview-container ' + cls;
+            document.querySelectorAll('.preview-stage').forEach(el => {
+                el.className = 'preview-stage ' + cls;
             });
             document.querySelectorAll('.BtnGroup [id^="btn-"]').forEach(btn => btn.classList.remove('btn-primary'));
             const idMap = { 'checkered': 'btn-checkered', 'image-bg': 'btn-image', 'solid-bg': 'btn-dark', 'black-bg': 'btn-black' };
             const active = document.getElementById(idMap[cls]);
             if (active) active.classList.add('btn-primary');
-            showFlash(`Background: ${cls.replace('-', ' ')}`);
+            showFlash(`Preview updated: ${cls.toUpperCase()}`);
         }
 
         function setRendering(cls) {
@@ -417,7 +395,7 @@
             });
             document.getElementById('btn-smooth').classList.toggle('btn-primary', cls === 'smooth');
             document.getElementById('btn-pixel').classList.toggle('btn-primary', cls === 'pixelated');
-            showFlash(`Engine: ${cls === 'smooth' ? 'Standard' : 'Pixel Perfect'}`);
+            showFlash(`Engine: ${cls === 'smooth' ? 'STANDARD' : 'PIXEL PERFECT'}`);
         }
 
         // Initialize defaults
