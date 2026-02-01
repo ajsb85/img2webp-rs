@@ -1,97 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-color-mode="auto" data-light-theme="light" data-dark-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebP Animation Optimization Benchmarks | img2webp-rs</title>
+    <title>WebP Animation Benchmarks | img2webp-rs</title>
 
-    <!-- Spectrum Web Components via ESM.run (Verified Entry Points) -->
-    <script type="module">
-        import 'https://esm.run/@spectrum-web-components/theme';
-        import 'https://esm.run/@spectrum-web-components/card';
-        import 'https://esm.run/@spectrum-web-components/action-button';
-        import 'https://esm.run/@spectrum-web-components/action-group';
-        import 'https://esm.run/@spectrum-web-components/divider';
-        import 'https://esm.run/@spectrum-web-components/heading';
-        import 'https://esm.run/@spectrum-web-components/body';
-        import 'https://esm.run/@spectrum-web-components/detail';
-    </script>
+    <!-- Primer CSS - GitHub's Design System -->
+    <link href="https://unpkg.com/@primer/css@22.1.0/dist/primer.css" rel="stylesheet" />
 
     <style>
         body {
-            margin: 0;
-            background-color: #f5f5f5;
-            color: #333;
-            font-family: adobe-clean, "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
-
-        .main-container {
+            background-color: var(--color-canvas-subtle);
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            padding: 64px 24px;
         }
 
-        header {
-            text-align: center;
-            max-width: 900px;
-            margin-bottom: 48px;
+        .Header {
+            background-color: var(--color-header-bg);
+            color: var(--color-header-text);
+            padding: 16px 0;
+            border-bottom: 1px solid var(--color-border-default);
         }
 
-        .controls-card {
-            background: white;
-            padding: 16px 32px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-            margin-bottom: 64px;
-            display: flex;
-            gap: 32px;
-            align-items: center;
-            border: 1px solid #e1e1e1;
+        .page-content {
+            flex: 1;
         }
 
-        .control-section {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .demo-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-            gap: 40px;
-            width: 100%;
-            max-width: 1300px;
-        }
-
-        sp-card {
-            --mod-card-background-color: white;
-            transition: transform 0.2s ease-in-out;
-        }
-
-        sp-card:hover {
-            transform: translateY(-4px);
-        }
-
-        .benchmark-preview {
-            height: 260px;
+        /* Benchmark Preview Area */
+        .preview-container {
+            position: relative;
+            height: 280px;
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: white;
-            position: relative;
+            background-color: var(--color-canvas-inset);
             overflow: hidden;
+            border-bottom: 1px solid var(--color-border-default);
             background-size: 20px 20px;
-            border-radius: 4px 4px 0 0;
+            transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Background variations */
+        /* Transparency Backgrounds */
         .checkered {
             background-image:
-                linear-gradient(45deg, #e1e1e1 25%, transparent 25%),
-                linear-gradient(-45deg, #e1e1e1 25%, transparent 25%),
-                linear-gradient(45deg, transparent 75%, #e1e1e1 75%),
-                linear-gradient(-45deg, transparent 75%, #e1e1e1 75%);
+                linear-gradient(45deg, var(--color-border-muted) 25%, transparent 25%),
+                linear-gradient(-45deg, var(--color-border-muted) 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, var(--color-border-muted) 75%),
+                linear-gradient(-45deg, transparent 75%, var(--color-border-muted) 75%);
             background-size: 40px 40px;
             background-position: 0 0, 0 20px, 20px -20px, -20px 0px;
         }
@@ -99,190 +55,296 @@
             background-image: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80');
             background-size: cover;
         }
-        .solid-bg { background: #2c3e50; }
-        .black-bg { background: #000000; }
+        .solid-bg { background-color: var(--color-neutral-emphasis-plus); }
+        .black-bg { background-color: #000000; }
 
-        .benchmark-image {
+        .benchmark-img {
             max-width: 85%;
             max-height: 85%;
+            object-fit: contain;
             display: block;
         }
 
         .pixelated { image-rendering: pixelated; }
 
-        .stats-box {
-            margin-top: 16px;
-            padding: 12px;
-            background: #f9f9f9;
-            border-radius: 4px;
-            border: 1px solid #eee;
+        .Box--benchmark {
+            transition: box-shadow 0.2s ease, transform 0.2s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .Box--benchmark:hover {
+            box-shadow: var(--color-shadow-medium);
+            transform: translateY(-2px);
         }
 
-        code {
-            font-family: "Source Code Pro", Monaco, monospace;
-            font-size: 0.85em;
-            background: #e8e8e8;
-            padding: 2px 4px;
-            border-radius: 3px;
+        .stats-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            background: var(--color-canvas-subtle);
+            border: 1px solid var(--color-border-default);
+            border-radius: 100px;
+            font-size: 12px;
+            font-family: var(--fontStack-monospace);
         }
 
-        footer {
-            margin-top: 100px;
-            max-width: 800px;
-            width: 100%;
-            border-top: 1px solid #e1e1e1;
-            padding-top: 48px;
+        .sticky-toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: var(--color-canvas-default);
+            border-bottom: 1px solid var(--color-border-default);
+            padding: 12px 0;
+        }
+
+        .sidebar-nav .SideNav-item[aria-current="page"] {
+            border-left-color: var(--color-accent-fg);
+        }
+
+        /* Layout Grid */
+        .benchmark-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 24px;
+        }
+
+        .flash-container {
+            position: fixed;
+            top: 80px;
+            right: 24px;
+            z-index: 1000;
+            min-width: 300px;
         }
     </style>
 </head>
-<body class="spectrum-Body">
+<body>
 
-    <sp-theme system="spectrum" color="light" scale="medium">
-        <div class="main-container">
-            <header>
-                <sp-heading size="XXL">WebP Animation Optimization</sp-heading>
-                <sp-body size="L">Benchmark report generated by <code>img2webp-rs</code> showcasing enterprise-grade transparency and compression control.</sp-body>
-            </header>
-
-            <div class="controls-card">
-                <div class="control-section">
-                    <sp-detail size="S">CANVAS BACKGROUND</sp-detail>
-                    <sp-action-group compact>
-                        <sp-action-button onclick="setBg('checkered')" selected id="btn-checkered">Checkered</sp-action-button>
-                        <sp-action-button onclick="setBg('image-bg')" id="btn-image">Nature</sp-action-button>
-                        <sp-action-button onclick="setBg('solid-bg')" id="btn-dark">Solid Dark</sp-action-button>
-                        <sp-action-button onclick="setBg('black-bg')" id="btn-black">Solid Black</sp-action-button>
-                    </sp-action-group>
-                </div>
-
-                <sp-divider vertical size="M" style="height: 40px;"></sp-divider>
-
-                <div class="control-section">
-                    <sp-detail size="S">IMAGE RENDERING</sp-detail>
-                    <sp-action-group compact>
-                        <sp-action-button onclick="setRendering('smooth')" selected id="btn-smooth">Smooth</sp-action-button>
-                        <sp-action-button onclick="setRendering('pixelated')" id="btn-pixel">Pixel Perfect</sp-action-button>
-                    </sp-action-group>
-                </div>
+    <header class="Header">
+        <div class="container-xl px-3 d-flex flex-items-center">
+            <div class="Header-item">
+                <a href="https://github.com/ajsb85/img2webp-rs" class="Header-link f2 d-flex flex-items-center">
+                    <svg height="32" class="octicon octicon-mark-github mr-2" viewBox="0 0 16 16" version="1.1" width="32" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+                    <span>img2webp-rs</span>
+                </a>
             </div>
-
-            <div class="demo-grid">
-                <!-- Standard -->
-                <sp-card heading="Standard" subheading="Lossless Default">
-                    <div slot="cover-photo" class="benchmark-preview checkered">
-                        <img src="animated.webp" class="benchmark-image">
-                    </div>
-                    <div slot="description">
-                        <sp-body size="S">A high-fidelity baseline with standard compression effort.</sp-body>
-                        <div class="stats-box">
-                            <sp-detail size="S">SIZE: 1.31 MB</sp-detail>
-                            <sp-detail size="S">FLAGS: Default</sp-detail>
-                        </div>
-                    </div>
-                </sp-card>
-
-                <!-- Pixel Perfect -->
-                <sp-card heading="Pixel Perfect" subheading="Professional Grade">
-                    <div slot="cover-photo" class="benchmark-preview checkered">
-                        <img src="animated_perfect.webp" class="benchmark-image">
-                    </div>
-                    <div slot="description">
-                        <sp-body size="S">Preserves RGB data in transparent pixels to avoid rendering artifacts.</sp-body>
-                        <div class="stats-box">
-                            <sp-detail size="S">SIZE: 1.40 MB</sp-detail>
-                            <sp-detail size="S">FLAGS: <code>-lossless -exact</code></sp-detail>
-                        </div>
-                    </div>
-                </sp-card>
-
-                <!-- Extreme Slow -->
-                <sp-card heading="Extreme Slow" subheading="Method 6 Optimization">
-                    <div slot="cover-photo" class="benchmark-preview checkered">
-                        <img src="animated_slowest.webp" class="benchmark-image">
-                    </div>
-                    <div slot="description">
-                        <sp-body size="S">Deep exhaustive search for the smallest bitstream using M6 effort.</sp-body>
-                        <div class="stats-box">
-                            <sp-detail size="S">SIZE: 1.38 MB</sp-detail>
-                            <sp-detail size="S">FLAGS: <code>-m 6 -alpha_filter 2</code></sp-detail>
-                        </div>
-                    </div>
-                </sp-card>
-
-                <!-- Optimized Small -->
-                <sp-card heading="Optimized Small" subheading="Efficient Assets">
-                    <div slot="cover-photo" class="benchmark-preview checkered">
-                        <img src="animated_small.webp" class="benchmark-image">
-                    </div>
-                    <div slot="description">
-                        <sp-body size="S">Mixed mode with reduced alpha quality for massive bandwidth savings.</sp-body>
-                        <div class="stats-box">
-                            <sp-detail size="S">SIZE: 203 KB</sp-detail>
-                            <sp-detail size="S">FLAGS: <code>-mixed -alpha_q 50</code></sp-detail>
-                        </div>
-                    </div>
-                </sp-card>
-
-                <!-- Near Lossless -->
-                <sp-card heading="Near Lossless" subheading="Perceptual Precision">
-                    <div slot="cover-photo" class="benchmark-preview checkered">
-                        <img src="animated_near_lossless60.webp" class="benchmark-image">
-                    </div>
-                    <div slot="description">
-                        <sp-body size="S">Subtle pixel preprocessing for enhanced compression ratios.</sp-body>
-                        <div class="stats-box">
-                            <sp-detail size="S">SIZE: 895 KB</sp-detail>
-                            <sp-detail size="S">FLAGS: <code>-near_lossless 60</code></sp-detail>
-                        </div>
-                    </div>
-                </sp-card>
-
-                <!-- Lossy Low -->
-                <sp-card heading="Lossy Low" subheading="Extreme Compression">
-                    <div slot="cover-photo" class="benchmark-preview checkered">
-                        <img src="animated_lossy_low.webp" class="benchmark-image">
-                    </div>
-                    <div slot="description">
-                        <sp-body size="S">Minimal quality threshold for bandwidth-restricted environments.</sp-body>
-                        <div class="stats-box">
-                            <sp-detail size="S">SIZE: 125 KB</sp-detail>
-                            <sp-detail size="S">FLAGS: <code>-lossy -q 30 -alpha_q 30</code></sp-detail>
-                        </div>
-                    </div>
-                </sp-card>
+            <div class="Header-item Header-item--full">
+                <nav class="d-flex">
+                    <a class="Header-link mr-3" href="https://github.com/ajsb85/img2webp-rs">Repository</a>
+                    <a class="Header-link mr-3" href="https://github.com/ajsb85/img2webp-rs/releases">Releases</a>
+                    <a class="Header-link" href="https://ajsb85.github.io/img2webp-rs/">Benchmarks</a>
+                </nav>
             </div>
-
-            <footer>
-                <sp-heading size="M">System Capabilities</sp-heading>
-                <sp-divider size="S"></sp-divider>
-                <sp-body size="M" style="margin-top: 24px;">
-                    Our <code>img2webp-rs</code> implementation bridges the gap between low-level WebP capabilities and modern high-level safety. By exposing parameters like <code>alpha_filter</code>, <code>exact</code>, and <code>near_lossless</code>, we empower designers and engineers to create visually stunning animations that respect performance constraints.
-                </sp-body>
-            </footer>
+            <div class="Header-item mr-0">
+                <span class="Label Label--secondary">v0.1.0</span>
+            </div>
         </div>
-    </sp-theme>
+    </header>
+
+    <div class="flash-container" id="flash-container"></div>
+
+    <div class="page-content container-xl px-3 pt-6">
+        <div class="Layout Layout--sidebarPosition-start Layout--sidebar-narrow">
+            <!-- Sidebar -->
+            <div class="Layout-sidebar">
+                <nav class="SideNav sidebar-nav border shadow-sm color-bg-default" style="border-radius: 6px;">
+                    <a class="SideNav-item" href="#overview" aria-current="page">Overview</a>
+                    <a class="SideNav-item" href="#benchmarks">Benchmarks</a>
+                    <a class="SideNav-item" href="#deep-dive">Technical Deep Dive</a>
+                    <a class="SideNav-item" href="#usage">Usage Examples</a>
+                </nav>
+
+                <div class="Box mt-4 shadow-sm">
+                    <div class="Box-header">
+                        <h3 class="Box-title">System Theme</h3>
+                    </div>
+                    <div class="Box-body">
+                        <p class="f6 color-fg-muted mb-2">Synchronized with your OS preferences.</p>
+                        <span class="Label Label--large" id="theme-status">Detecting...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="Layout-main">
+                <div class="Subhead mb-4" id="overview">
+                    <div class="Subhead-heading f0-light">WebP Optimization Analysis</div>
+                    <div class="Subhead-description">Comprehensive benchmarking of enterprise-grade animation strategies.</div>
+                </div>
+
+                <!-- Sticky Controls -->
+                <div class="Box mb-6 shadow-sm sticky-toolbar px-3 border-accent">
+                    <div class="d-flex flex-items-center flex-justify-between flex-wrap">
+                        <div class="d-flex flex-items-center mr-4 py-2">
+                            <span class="text-bold f6 color-fg-muted mr-3">BACKGROUND</span>
+                            <div class="BtnGroup">
+                                <button class="btn BtnGroup-item btn-sm" type="button" onclick="setBg('checkered')" id="btn-checkered">Checkered</button>
+                                <button class="btn BtnGroup-item btn-sm" type="button" onclick="setBg('image-bg')" id="btn-image">Nature</button>
+                                <button class="btn BtnGroup-item btn-sm" type="button" onclick="setBg('solid-bg')" id="btn-dark">Dark Blue</button>
+                                <button class="btn BtnGroup-item btn-sm" type="button" onclick="setBg('black-bg')" id="btn-black">Black</button>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex flex-items-center py-2">
+                            <span class="text-bold f6 color-fg-muted mr-3">RENDERING</span>
+                            <div class="BtnGroup">
+                                <button class="btn BtnGroup-item btn-sm" type="button" onclick="setRendering('smooth')" id="btn-smooth">Standard</button>
+                                <button class="btn BtnGroup-item btn-sm" type="button" onclick="setRendering('pixelated')" id="btn-pixel">Pixel Perfect</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="benchmark-grid" id="benchmarks">
+                    <!-- Standard -->
+                    <div class="Box Box--benchmark shadow-sm">
+                        <div class="preview-container checkered">
+                            <img src="animated.webp" class="benchmark-img">
+                        </div>
+                        <div class="Box-body d-flex flex-column flex-1">
+                            <div class="d-flex flex-items-center mb-2">
+                                <h3 class="f4 mr-2">Standard</h3>
+                                <span class="Label">Default</span>
+                            </div>
+                            <p class="color-fg-muted f6 flex-1">Industry standard lossless behavior. Optimal balance for general use.</p>
+                            <div class="d-flex flex-items-center flex-wrap gap-2 mt-3">
+                                <div class="stats-badge">1.31 MB</div>
+                                <code class="f6 color-fg-muted">Default</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pixel Perfect -->
+                    <div class="Box Box--benchmark shadow-sm">
+                        <div class="preview-container checkered">
+                            <img src="animated_perfect.webp" class="benchmark-img">
+                        </div>
+                        <div class="Box-body d-flex flex-column flex-1">
+                            <div class="d-flex flex-items-center mb-2">
+                                <h3 class="f4 mr-2">Pixel Perfect</h3>
+                                <span class="Label Label--success">Exact</span>
+                            </div>
+                            <p class="color-fg-muted f6 flex-1">Ensures transparency integrity by preserving RGB data in Alpha=0 pixels.</p>
+                            <div class="d-flex flex-items-center flex-wrap gap-2 mt-3">
+                                <div class="stats-badge">1.40 MB</div>
+                                <code class="f6 color-fg-muted">-lossless -exact</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Optimized Small -->
+                    <div class="Box Box--benchmark shadow-sm border-accent">
+                        <div class="preview-container checkered">
+                            <img src="animated_small.webp" class="benchmark-img">
+                        </div>
+                        <div class="Box-body d-flex flex-column flex-1">
+                            <div class="d-flex flex-items-center mb-2">
+                                <h3 class="f4 mr-2 color-fg-accent">Optimized Small</h3>
+                                <span class="Label Label--accent">Recommended</span>
+                            </div>
+                            <p class="color-fg-muted f6 flex-1">Mixed-mode strategy with intelligent alpha reduction. ~85% size saving.</p>
+                            <div class="d-flex flex-items-center flex-wrap gap-2 mt-3">
+                                <div class="stats-badge color-bg-accent-emphasis color-fg-on-emphasis">203 KB</div>
+                                <code class="f6 color-fg-muted">-mixed -alpha_q 50</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Near Lossless -->
+                    <div class="Box Box--benchmark shadow-sm">
+                        <div class="preview-container checkered">
+                            <img src="animated_near_lossless60.webp" class="benchmark-img">
+                        </div>
+                        <div class="Box-body d-flex flex-column flex-1">
+                            <div class="d-flex flex-items-center mb-2">
+                                <h3 class="f4 mr-2">Near Lossless</h3>
+                                <span class="Label">Hybrid</span>
+                            </div>
+                            <p class="color-fg-muted f6 flex-1">Advanced pixel preprocessing that yields significant compression gains.</p>
+                            <div class="d-flex flex-items-center flex-wrap gap-2 mt-3">
+                                <div class="stats-badge">895 KB</div>
+                                <code class="f6 color-fg-muted">-near_lossless 60</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="Subhead mt-8 mb-4" id="deep-dive">
+                    <div class="Subhead-heading">Technical Architecture</div>
+                </div>
+                
+                <div class="markdown-body">
+                    <p>By leveraging the <code>libwebp</code> muxing engine through a safe Rust FFI, <code>img2webp-rs</code> provides controls previously only available in low-level C utilities.</p>
+                    <ul>
+                        <li><strong>Alpha Filtering:</strong> Reduces entropy in transparency channels via spatial prediction.</li>
+                        <li><strong>Sharp YUV:</strong> Minimizes color bleeding in high-contrast transitions.</li>
+                        <li><strong>M6 Complexity:</strong> Enables the highest exhaustive search for optimal bitstream representation.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer mt-8 py-6 border-top color-bg-subtle">
+        <div class="container-xl px-3 d-flex flex-justify-between flex-items-center">
+            <div class="d-flex flex-items-center">
+                <svg height="24" class="octicon octicon-mark-github mr-3 color-fg-muted" viewBox="0 0 16 16" version="1.1" width="24"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+                <span class="f6 color-fg-muted">&copy; 2026 img2webp-rs. Built with Primer.</span>
+            </div>
+            <nav class="d-flex">
+                <a class="Link--secondary f6 mr-3" href="#">Terms</a>
+                <a class="Link--secondary f6 mr-3" href="#">Privacy</a>
+                <a class="Link--secondary f6" href="https://github.com/ajsb85/img2webp-rs">Source Code</a>
+            </nav>
+        </div>
+    </footer>
 
     <script>
+        function showFlash(message) {
+            const container = document.getElementById('flash-container');
+            const flash = document.createElement('div');
+            flash.className = 'flash flash-success mb-3 shadow-sm anim-fade-in';
+            flash.innerHTML = `
+                <svg class="octicon octicon-check" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>
+                ${message}
+            `;
+            container.appendChild(flash);
+            setTimeout(() => { flash.style.opacity = '0'; setTimeout(() => flash.remove(), 500); }, 2000);
+        }
+
         function setBg(cls) {
-            document.querySelectorAll('.benchmark-preview').forEach(el => {
-                el.className = 'benchmark-preview ' + cls;
+            document.querySelectorAll('.preview-container').forEach(el => {
+                el.className = 'preview-container ' + cls;
             });
-            // Update selected state
-            document.querySelectorAll('sp-action-button[id^="btn-"]').forEach(btn => btn.selected = false);
+            document.querySelectorAll('.BtnGroup [id^="btn-"]').forEach(btn => btn.classList.remove('btn-primary'));
             const idMap = { 'checkered': 'btn-checkered', 'image-bg': 'btn-image', 'solid-bg': 'btn-dark', 'black-bg': 'btn-black' };
-            const activeBtn = document.getElementById(idMap[cls]);
-            if (activeBtn) activeBtn.selected = true;
+            const active = document.getElementById(idMap[cls]);
+            if (active) active.classList.add('btn-primary');
+            showFlash(`Canvas background set to ${cls.replace('-', ' ')}`);
         }
 
         function setRendering(cls) {
-            document.querySelectorAll('.benchmark-image').forEach(el => {
-                el.className = 'benchmark-image ' + cls;
+            document.querySelectorAll('.benchmark-img').forEach(el => {
+                el.className = 'benchmark-img ' + cls;
             });
-            const smoothBtn = document.getElementById('btn-smooth');
-            const pixelBtn = document.getElementById('btn-pixel');
-            if (smoothBtn) smoothBtn.selected = (cls === 'smooth');
-            if (pixelBtn) pixelBtn.selected = (cls === 'pixelated');
+            document.getElementById('btn-smooth').classList.toggle('btn-primary', cls === 'smooth');
+            document.getElementById('btn-pixel').classList.toggle('btn-primary', cls === 'pixelated');
+            showFlash(`Rendering engine switched to ${cls === 'smooth' ? 'Standard' : 'Pixel Perfect'}`);
         }
+
+        function updateThemeStatus() {
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const status = document.getElementById('theme-status');
+            status.textContent = isDark ? 'Dark Mode' : 'Light Mode';
+            status.className = `Label Label--large ${isDark ? 'Label--secondary' : 'Label--accent'}`;
+        }
+
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateThemeStatus);
+        updateThemeStatus();
+
+        // Initialize defaults
+        setBg('checkered');
+        setRendering('smooth');
     </script>
 </body>
 </html>
