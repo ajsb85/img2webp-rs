@@ -19,7 +19,7 @@ pub enum Error {
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct EncoderOptions {
     pub minimize_size: bool,
     pub kmin: i32,
@@ -28,25 +28,13 @@ pub struct EncoderOptions {
     pub verbose: bool,
 }
 
-impl Default for EncoderOptions {
-    fn default() -> Self {
-        Self {
-            minimize_size: false,
-            kmin: 0,
-            kmax: 0,
-            allow_mixed: false,
-            verbose: false,
-        }
-    }
-}
-
 #[derive(Clone, Debug)]
 pub struct FrameConfig {
     pub lossy: bool,
     pub quality: f32,
     pub method: i32,
     pub duration: i32,
-    pub exact: bool, 
+    pub exact: bool,
     pub near_lossless: i32,
     pub use_sharp_yuv: bool,
     pub alpha_quality: i32,
@@ -81,7 +69,10 @@ pub struct AnimationEncoder {
 impl AnimationEncoder {
     pub fn new(width: i32, height: i32, options: &EncoderOptions) -> Result<Self> {
         let mut anim_config: WebPAnimEncoderOptions = unsafe { std::mem::zeroed() };
-        if unsafe { WebPAnimEncoderOptionsInitInternal(&mut anim_config, WEBP_MUX_ABI_VERSION as i32) } == 0 {
+        if unsafe {
+            WebPAnimEncoderOptionsInitInternal(&mut anim_config, WEBP_MUX_ABI_VERSION as i32)
+        } == 0
+        {
             return Err(Error::WebPError);
         }
 
@@ -91,7 +82,9 @@ impl AnimationEncoder {
         anim_config.allow_mixed = options.allow_mixed as i32;
         anim_config.verbose = options.verbose as i32;
 
-        let enc = unsafe { WebPAnimEncoderNewInternal(width, height, &anim_config, WEBP_MUX_ABI_VERSION as i32) };
+        let enc = unsafe {
+            WebPAnimEncoderNewInternal(width, height, &anim_config, WEBP_MUX_ABI_VERSION as i32)
+        };
         if enc.is_null() {
             return Err(Error::MemAllocFailed);
         }
@@ -106,27 +99,35 @@ impl AnimationEncoder {
 
     pub fn add_frame(&mut self, img: &image::DynamicImage, config: &FrameConfig) -> Result<()> {
         if img.width() as i32 != self.width || img.height() as i32 != self.height {
-             return Err(Error::InvalidConfig); 
+            return Err(Error::InvalidConfig);
         }
 
         let mut pic: WebPPicture = unsafe { std::mem::zeroed() };
         if unsafe { WebPPictureInitInternal(&mut pic, WEBP_ENCODER_ABI_VERSION as i32) } == 0 {
-             return Err(Error::WebPError);
+            return Err(Error::WebPError);
         }
         pic.use_argb = 1;
         pic.width = self.width;
         pic.height = self.height;
-        
+
         let rgba = img.to_rgba8();
-        let stride = self.width * 4; 
-        
+        let stride = self.width * 4;
+
         if unsafe { WebPPictureImportRGBA(&mut pic, rgba.as_ptr(), stride) } == 0 {
-             unsafe { WebPPictureFree(&mut pic) };
-             return Err(Error::WebPError);
+            unsafe { WebPPictureFree(&mut pic) };
+            return Err(Error::WebPError);
         }
 
         let mut webp_config: WebPConfig = unsafe { std::mem::zeroed() };
-        if unsafe { WebPConfigInitInternal(&mut webp_config, WebPPreset::WEBP_PRESET_DEFAULT, 75.0, WEBP_ENCODER_ABI_VERSION as i32) } == 0 {
+        if unsafe {
+            WebPConfigInitInternal(
+                &mut webp_config,
+                WebPPreset::WEBP_PRESET_DEFAULT,
+                75.0,
+                WEBP_ENCODER_ABI_VERSION as i32,
+            )
+        } == 0
+        {
             unsafe { WebPPictureFree(&mut pic) };
             return Err(Error::WebPError);
         }
@@ -142,24 +143,26 @@ impl AnimationEncoder {
         webp_config.alpha_compression = config.alpha_compression;
 
         if unsafe { WebPValidateConfig(&webp_config) } == 0 {
-             unsafe { WebPPictureFree(&mut pic) };
-             return Err(Error::InvalidConfig);
+            unsafe { WebPPictureFree(&mut pic) };
+            return Err(Error::InvalidConfig);
         }
 
         if unsafe { WebPAnimEncoderAdd(self.enc, &mut pic, self.timestamp_ms, &webp_config) } == 0 {
-             unsafe { WebPPictureFree(&mut pic) };
-             return Err(Error::WebPError);
+            unsafe { WebPPictureFree(&mut pic) };
+            return Err(Error::WebPError);
         }
 
         unsafe { WebPPictureFree(&mut pic) };
-        
+
         self.timestamp_ms += config.duration;
 
         Ok(())
     }
 
     pub fn assemble(&mut self, loop_count: i32) -> Result<Vec<u8>> {
-        if unsafe { WebPAnimEncoderAdd(self.enc, ptr::null_mut(), self.timestamp_ms, ptr::null()) } == 0 {
+        if unsafe { WebPAnimEncoderAdd(self.enc, ptr::null_mut(), self.timestamp_ms, ptr::null()) }
+            == 0
+        {
             return Err(Error::WebPError);
         }
 
@@ -169,52 +172,54 @@ impl AnimationEncoder {
             return Err(Error::WebPError);
         }
 
-        let mut final_data = unsafe { std::slice::from_raw_parts(webp_data.bytes, webp_data.size) }.to_vec();
+        let mut final_data =
+            unsafe { std::slice::from_raw_parts(webp_data.bytes, webp_data.size) }.to_vec();
         unsafe { WebPDataClear(&mut webp_data) };
 
         if loop_count > 0 {
-             final_data = self.set_loop_count(&final_data, loop_count)?;
+            final_data = self.set_loop_count(&final_data, loop_count)?;
         }
 
         Ok(final_data)
     }
-    
+
     fn set_loop_count(&self, data: &[u8], loop_count: i32) -> Result<Vec<u8>> {
-         let mut webp_data: WebPData = unsafe { std::mem::zeroed() };
-         webp_data.bytes = data.as_ptr();
-         webp_data.size = data.len();
-         
-         let mux = unsafe { WebPMuxCreateInternal(&webp_data, 1, WEBP_MUX_ABI_VERSION as i32) };
-         if mux.is_null() {
-             return Err(Error::WebPError);
-         }
-         
-         let mut new_params: WebPMuxAnimParams = unsafe { std::mem::zeroed() };
-         let mut err = unsafe { WebPMuxGetAnimationParams(mux, &mut new_params) };
-         if err != WebPMuxError::WEBP_MUX_OK {
-              unsafe { WebPMuxDelete(mux) };
-              return Err(Error::WebPError);
-         }
-         
-         new_params.loop_count = loop_count;
-         err = unsafe { WebPMuxSetAnimationParams(mux, &new_params) };
-         if err != WebPMuxError::WEBP_MUX_OK {
-              unsafe { WebPMuxDelete(mux) };
-              return Err(Error::WebPError);
-         }
-         
-         let mut output_data: WebPData = unsafe { std::mem::zeroed() };
-         err = unsafe { WebPMuxAssemble(mux, &mut output_data) };
-         unsafe { WebPMuxDelete(mux) };
-         
-         if err != WebPMuxError::WEBP_MUX_OK {
-             return Err(Error::WebPError);
-         }
-         
-         let res = unsafe { std::slice::from_raw_parts(output_data.bytes, output_data.size) }.to_vec();
-         unsafe { WebPDataClear(&mut output_data) };
-         
-         Ok(res)
+        let mut webp_data: WebPData = unsafe { std::mem::zeroed() };
+        webp_data.bytes = data.as_ptr();
+        webp_data.size = data.len();
+
+        let mux = unsafe { WebPMuxCreateInternal(&webp_data, 1, WEBP_MUX_ABI_VERSION as i32) };
+        if mux.is_null() {
+            return Err(Error::WebPError);
+        }
+
+        let mut new_params: WebPMuxAnimParams = unsafe { std::mem::zeroed() };
+        let mut err = unsafe { WebPMuxGetAnimationParams(mux, &mut new_params) };
+        if err != WebPMuxError::WEBP_MUX_OK {
+            unsafe { WebPMuxDelete(mux) };
+            return Err(Error::WebPError);
+        }
+
+        new_params.loop_count = loop_count;
+        err = unsafe { WebPMuxSetAnimationParams(mux, &new_params) };
+        if err != WebPMuxError::WEBP_MUX_OK {
+            unsafe { WebPMuxDelete(mux) };
+            return Err(Error::WebPError);
+        }
+
+        let mut output_data: WebPData = unsafe { std::mem::zeroed() };
+        err = unsafe { WebPMuxAssemble(mux, &mut output_data) };
+        unsafe { WebPMuxDelete(mux) };
+
+        if err != WebPMuxError::WEBP_MUX_OK {
+            return Err(Error::WebPError);
+        }
+
+        let res =
+            unsafe { std::slice::from_raw_parts(output_data.bytes, output_data.size) }.to_vec();
+        unsafe { WebPDataClear(&mut output_data) };
+
+        Ok(res)
     }
 }
 

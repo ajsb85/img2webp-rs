@@ -1,6 +1,6 @@
 use anyhow::{Context, Result};
 use std::env;
-use webp_anim::{AnimationEncoder, EncoderOptions, FrameConfig, read_image};
+use webp_anim::{read_image, AnimationEncoder, EncoderOptions, FrameConfig};
 
 fn main() -> Result<()> {
     env_logger::init();
@@ -28,7 +28,7 @@ fn main() -> Result<()> {
     let mut global_frame_config = FrameConfig::default();
     let mut output_path = String::new();
     let mut loop_count = 0;
-    
+
     // First pass: Global options
     let mut i = 1;
     let mut parsed_args = vec![false; args.len()];
@@ -36,41 +36,41 @@ fn main() -> Result<()> {
         match args[i].as_str() {
             "-o" => {
                 if i + 1 < args.len() {
-                    output_path = args[i+1].clone();
+                    output_path = args[i + 1].clone();
                     parsed_args[i] = true;
-                    parsed_args[i+1] = true;
+                    parsed_args[i + 1] = true;
                     i += 1;
                 }
             }
             "-kmin" => {
                 if i + 1 < args.len() {
-                    options.kmin = args[i+1].parse().unwrap_or(0);
+                    options.kmin = args[i + 1].parse().unwrap_or(0);
                     parsed_args[i] = true;
-                    parsed_args[i+1] = true;
+                    parsed_args[i + 1] = true;
                     i += 1;
                 }
             }
             "-kmax" => {
                 if i + 1 < args.len() {
-                    options.kmax = args[i+1].parse().unwrap_or(0);
+                    options.kmax = args[i + 1].parse().unwrap_or(0);
                     parsed_args[i] = true;
-                    parsed_args[i+1] = true;
+                    parsed_args[i + 1] = true;
                     i += 1;
                 }
             }
             "-loop" => {
                 if i + 1 < args.len() {
-                    loop_count = args[i+1].parse().unwrap_or(0);
+                    loop_count = args[i + 1].parse().unwrap_or(0);
                     parsed_args[i] = true;
-                    parsed_args[i+1] = true;
+                    parsed_args[i + 1] = true;
                     i += 1;
                 }
             }
             "-near_lossless" => {
                 if i + 1 < args.len() {
-                    global_frame_config.near_lossless = args[i+1].parse().unwrap_or(100);
+                    global_frame_config.near_lossless = args[i + 1].parse().unwrap_or(100);
                     parsed_args[i] = true;
-                    parsed_args[i+1] = true;
+                    parsed_args[i + 1] = true;
                     i += 1;
                 }
             }
@@ -93,25 +93,25 @@ fn main() -> Result<()> {
             }
             "-alpha_q" => {
                 if i + 1 < args.len() {
-                    global_frame_config.alpha_quality = args[i+1].parse().unwrap_or(100);
+                    global_frame_config.alpha_quality = args[i + 1].parse().unwrap_or(100);
                     parsed_args[i] = true;
-                    parsed_args[i+1] = true;
+                    parsed_args[i + 1] = true;
                     i += 1;
                 }
             }
             "-alpha_method" => {
                 if i + 1 < args.len() {
-                    global_frame_config.alpha_compression = args[i+1].parse().unwrap_or(1);
+                    global_frame_config.alpha_compression = args[i + 1].parse().unwrap_or(1);
                     parsed_args[i] = true;
-                    parsed_args[i+1] = true;
+                    parsed_args[i + 1] = true;
                     i += 1;
                 }
             }
             "-alpha_filter" => {
                 if i + 1 < args.len() {
-                    global_frame_config.alpha_filtering = args[i+1].parse().unwrap_or(1);
+                    global_frame_config.alpha_filtering = args[i + 1].parse().unwrap_or(1);
                     parsed_args[i] = true;
-                    parsed_args[i+1] = true;
+                    parsed_args[i + 1] = true;
                     i += 1;
                 }
             }
@@ -129,10 +129,10 @@ fn main() -> Result<()> {
     i = 1;
     while i < args.len() {
         if parsed_args[i] {
-             i += 1;
-             continue;
+            i += 1;
+            continue;
         }
-        
+
         let arg = &args[i];
         if arg.starts_with('-') {
             match arg.as_str() {
@@ -140,19 +140,19 @@ fn main() -> Result<()> {
                 "-lossless" => current_config.lossy = false,
                 "-q" => {
                     if i + 1 < args.len() {
-                        current_config.quality = args[i+1].parse().unwrap_or(75.0);
+                        current_config.quality = args[i + 1].parse().unwrap_or(75.0);
                         i += 1;
                     }
                 }
                 "-m" => {
                     if i + 1 < args.len() {
-                        current_config.method = args[i+1].parse().unwrap_or(4);
+                        current_config.method = args[i + 1].parse().unwrap_or(4);
                         i += 1;
                     }
                 }
                 "-d" => {
                     if i + 1 < args.len() {
-                        current_config.duration = args[i+1].parse().unwrap_or(100);
+                        current_config.duration = args[i + 1].parse().unwrap_or(100);
                         i += 1;
                     }
                 }
@@ -165,14 +165,21 @@ fn main() -> Result<()> {
         } else {
             // File
             let img = read_image(arg).context(format!("Failed to read image: {}", arg))?;
-            
+
             if encoder.is_none() {
-                encoder = Some(AnimationEncoder::new(img.width() as i32, img.height() as i32, &options)?);
+                encoder = Some(AnimationEncoder::new(
+                    img.width() as i32,
+                    img.height() as i32,
+                    &options,
+                )?);
             }
 
             if let Some(enc) = &mut encoder {
                 if options.verbose {
-                    eprintln!("Added frame #{} at time {} (file: {})", pic_num, timestamp_ms, arg);
+                    eprintln!(
+                        "Added frame #{} at time {} (file: {})",
+                        pic_num, timestamp_ms, arg
+                    );
                 }
                 enc.add_frame(&img, &current_config)?;
                 timestamp_ms += current_config.duration;
@@ -190,7 +197,7 @@ fn main() -> Result<()> {
                 eprintln!("Output file: {} ", output_path);
             }
         } else {
-             eprintln!("[no output file specified]");
+            eprintln!("[no output file specified]");
         }
         eprintln!("[{} frames, {} bytes].", pic_num, data.len());
     } else {
@@ -203,23 +210,23 @@ fn main() -> Result<()> {
 
 #[allow(non_snake_case)]
 fn Help() {
-  println!("Usage:");
-  println!("  img2webp [file_options] [[frame_options] frame_file]... [-o webp_file]\n");
-  println!("File-level options:");
-  println!(" -min_size ............ minimize size");
-  println!(" -mixed ............... use mixed lossy/lossless automatic mode");
-  println!(" -loop <int> .......... loop count (default: 0, = infinite loop)");
-  println!(" -near_lossless <int> . use near-lossless image preprocessing (0..100)");
-  println!(" -alpha_q <int> ....... alpha quality (0..100), default 100");
-  println!(" -alpha_method <int> .. alpha compression method (0..1), default 1");
-  println!(" -alpha_filter <int> .. alpha filtering method (0..2), default 1");
-  println!(" -v ................... verbose mode");
-  println!(" -h ................... this help\n");
-  println!("Per-frame options:");
-  println!(" -d <int> ............. frame duration in ms (default: 100)");
-  println!(" -lossless ............ use lossless mode (default)");
-  println!(" -lossy ............... use lossy mode");
-  println!(" -q <float> ........... quality");
-  println!(" -m <int> ............. compression method (0=fast, 6=slowest)");
-  println!(" -exact, -noexact ..... preserve or alter RGB values in transparent area");
+    println!("Usage:");
+    println!("  img2webp [file_options] [[frame_options] frame_file]... [-o webp_file]\n");
+    println!("File-level options:");
+    println!(" -min_size ............ minimize size");
+    println!(" -mixed ............... use mixed lossy/lossless automatic mode");
+    println!(" -loop <int> .......... loop count (default: 0, = infinite loop)");
+    println!(" -near_lossless <int> . use near-lossless image preprocessing (0..100)");
+    println!(" -alpha_q <int> ....... alpha quality (0..100), default 100");
+    println!(" -alpha_method <int> .. alpha compression method (0..1), default 1");
+    println!(" -alpha_filter <int> .. alpha filtering method (0..2), default 1");
+    println!(" -v ................... verbose mode");
+    println!(" -h ................... this help\n");
+    println!("Per-frame options:");
+    println!(" -d <int> ............. frame duration in ms (default: 100)");
+    println!(" -lossless ............ use lossless mode (default)");
+    println!(" -lossy ............... use lossy mode");
+    println!(" -q <float> ........... quality");
+    println!(" -m <int> ............. compression method (0=fast, 6=slowest)");
+    println!(" -exact, -noexact ..... preserve or alter RGB values in transparent area");
 }
