@@ -14,39 +14,43 @@ We use a `Makefile` to enforce standards across the project. Please use these co
 ### 1. Code Quality
 ```bash
 make lint   # Automatically fix common lints and format code
-make check  # Run full lint check + test suite (Simulates CI)
+make check  # Run full lint check + test suite
 ```
 
 ### 2. Verification
 ```bash
-make generate # Re-generate all benchmark animations to verify no visual regressions
+make generate # Re-generate all benchmark animations in assets/ to verify no visual regressions
 ```
 
 ## Release & Deployment (Maintainers only)
 
-The project relies on a **Pure Makefile Workflow**. GitHub Actions is disabled to ensure all releases are built and signed in a controlled, local environment.
+The project relies on a **Native Cross-Compilation Workflow**. GitHub Actions is disabled to ensure all releases are built and signed in a controlled, local environment.
 
 ### Updating the Live Demo
-To update the GitHub Pages site with new code or frames:
+To update the GitHub Pages site with new assets:
 ```bash
 make deploy
 ```
 
 ### Publishing a New Version
-To perform a full, GPG-signed release with binary artifacts:
+To perform a full, GPG-signed, multi-platform release:
 ```bash
 make release VERSION=v1.0.0
 ```
 This command:
-1.  Runs all quality checks (`clippy`, `rustfmt`, `tests`).
-2.  Builds the production-ready release binary.
-3.  Creates a **GPG-signed git tag**.
-4.  Generates a GPG detached signature (`.asc`) for the binary.
-5.  Creates a GitHub release and uploads both the **binary** and the **signature**.
+1.  **Validates**: Runs all quality checks (`clippy`, `rustfmt`, `tests`).
+2.  **Cross-Builds**: Compiles native binaries for:
+    - **Linux (x64)** (Native)
+    - **Windows (x64)** (via MinGW)
+    - **macOS (x64)** (via Zig)
+3.  **Signs**: Creates a **GPG-signed git tag** and generates GPG detached signatures (`.asc`) for **all** binaries.
+4.  **Publishes**: Creates a GitHub release and uploads all binaries and their corresponding signatures.
 
 ## Development Setup
-Ensure you have the following installed:
-- Rust (Stable)
-- `libwebp` development headers
-- `gh` CLI (GitHub CLI)
-- `gpg` (For signed releases)
+Ensure you have the following installed for full release capability:
+- **Rust** (Stable) + `x86_64-pc-windows-gnu` and `x86_64-apple-darwin` targets.
+- **Zig** + **cargo-zigbuild** (for macOS builds).
+- **MinGW-w64** (for Windows builds).
+- **libwebp** development headers.
+- **gh** CLI (GitHub CLI).
+- **gpg** (For signed releases).
