@@ -1,74 +1,98 @@
 <!DOCTYPE html>
-<html lang="en" class="spectrum spectrum--light spectrum--medium">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebP Animation Optimization Benchmarks | img2webp-rs</title>
 
-    <!-- Spectrum CSS Tokens -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@spectrum-css/tokens@latest/dist/spectrum-global.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@spectrum-css/tokens@latest/dist/spectrum-medium.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@spectrum-css/tokens@latest/dist/spectrum-light.css">
-
-    <!-- Spectrum CSS Standalone Bundle -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@adobe/spectrum-css@latest/dist/standalone/spectrum-css-standalone.min.css">
+    <!-- Spectrum Web Components via JSPM (Best practice for ESM modules) -->
+    <script type="module">
+        import 'https://jspm.dev/@spectrum-web-components/theme/sp-theme.js';
+        import 'https://jspm.dev/@spectrum-web-components/theme/src/themes.js';
+        import 'https://jspm.dev/@spectrum-web-components/card/sp-card.js';
+        import 'https://jspm.dev/@spectrum-web-components/action-button/sp-action-button.js';
+        import 'https://jspm.dev/@spectrum-web-components/action-group/sp-action-group.js';
+        import 'https://jspm.dev/@spectrum-web-components/divider/sp-divider.js';
+        import 'https://jspm.dev/@spectrum-web-components/typography/sp-heading.js';
+        import 'https://jspm.dev/@spectrum-web-components/typography/sp-body.js';
+        import 'https://jspm.dev/@spectrum-web-components/typography/sp-detail.js';
+    </script>
 
     <style>
         body {
             margin: 0;
-            padding: 40px;
-            background-color: var(--spectrum-global-color-gray-100);
+            background-color: #f5f5f5;
+            color: #333;
+            font-family: adobe-clean, "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        .main-container {
             display: flex;
             flex-direction: column;
             align-items: center;
+            padding: 64px 24px;
         }
 
-        .header-section {
+        header {
             text-align: center;
-            margin-bottom: 40px;
-            max-width: 800px;
+            max-width: 900px;
+            margin-bottom: 48px;
         }
 
-        .controls-container {
+        .controls-card {
+            background: white;
+            padding: 16px 32px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            margin-bottom: 64px;
             display: flex;
-            gap: 12px;
-            margin-top: 24px;
-            flex-wrap: wrap;
-            justify-content: center;
-            padding: 16px;
-            background: var(--spectrum-global-color-gray-50);
-            border-radius: var(--spectrum-global-dimension-static-size-100);
-            box-shadow: var(--spectrum-global-dimension-static-size-10) var(--spectrum-global-dimension-static-size-10) var(--spectrum-global-dimension-static-size-40) rgba(0,0,0,0.05);
+            gap: 32px;
+            align-items: center;
+            border: 1px solid #e1e1e1;
+        }
+
+        .control-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
         .demo-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-            gap: 32px;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 40px;
             width: 100%;
-            max-width: 1200px;
+            max-width: 1300px;
         }
 
-        /* Custom Card Preview area to house the backgrounds */
+        sp-card {
+            --mod-card-background-color: white;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        sp-card:hover {
+            transform: translateY(-4px);
+        }
+
         .benchmark-preview {
-            position: relative;
-            height: 240px;
-            background-color: white;
+            height: 260px;
             display: flex;
             justify-content: center;
             align-items: center;
-            border-bottom: 1px solid var(--spectrum-global-color-gray-200);
+            background-color: white;
+            position: relative;
             overflow: hidden;
             background-size: 20px 20px;
+            border-radius: 4px 4px 0 0;
         }
 
-        /* Background Types */
+        /* Background variations */
         .checkered {
             background-image:
-                linear-gradient(45deg, #ccc 25%, transparent 25%),
-                linear-gradient(-45deg, #ccc 25%, transparent 25%),
-                linear-gradient(45deg, transparent 75%, #ccc 75%),
-                linear-gradient(-45deg, transparent 75%, #ccc 75%);
+                linear-gradient(45deg, #e1e1e1 25%, transparent 25%),
+                linear-gradient(-45deg, #e1e1e1 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #e1e1e1 75%),
+                linear-gradient(-45deg, transparent 75%, #e1e1e1 75%);
             background-size: 40px 40px;
             background-position: 0 0, 0 20px, 20px -20px, -20px 0px;
         }
@@ -78,188 +102,184 @@
         }
         .solid-bg { background: #2c3e50; }
         .black-bg { background: #000000; }
-        
+
         .benchmark-image {
-            max-width: 90%;
-            max-height: 90%;
+            max-width: 85%;
+            max-height: 85%;
             display: block;
         }
-        
+
         .pixelated { image-rendering: pixelated; }
 
-        .deep-dive-section {
-            margin-top: 60px;
+        .stats-box {
+            margin-top: 16px;
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            border: 1px solid #eee;
+        }
+
+        code {
+            font-family: "Source Code Pro", Monaco, monospace;
+            font-size: 0.85em;
+            background: #e8e8e8;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        footer {
+            margin-top: 100px;
             max-width: 800px;
             width: 100%;
-        }
-
-        .stats-label {
-            font-weight: bold;
-            color: var(--spectrum-global-color-gray-700);
-        }
-
-        .control-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            border-top: 1px solid #e1e1e1;
+            padding-top: 48px;
         }
     </style>
 </head>
 <body class="spectrum-Body">
 
-    <div class="header-section">
-        <h1 class="spectrum-Heading spectrum-Heading--sizeXXL">WebP Animation Benchmarks</h1>
-        <p class="spectrum-Body--sizeL">Experimental results from <code>img2webp-rs</code> showcasing transparency handling and optimization strategies.</p>
-        
-        <div class="controls-container">
-            <div class="control-group">
-                <span class="spectrum-Detail spectrum-Detail--sizeS">BACKGROUND</span>
-                <button class="spectrum-ActionButton spectrum-ActionButton--quiet" onclick="setBg('checkered')">
-                    <span class="spectrum-ActionButton-label">Checkered</span>
-                </button>
-                <button class="spectrum-ActionButton spectrum-ActionButton--quiet" onclick="setBg('image-bg')">
-                    <span class="spectrum-ActionButton-label">Nature</span>
-                </button>
-                <button class="spectrum-ActionButton spectrum-ActionButton--quiet" onclick="setBg('solid-bg')">
-                    <span class="spectrum-ActionButton-label">Solid Dark</span>
-                </button>
-                <button class="spectrum-ActionButton spectrum-ActionButton--quiet" onclick="setBg('black-bg')">
-                    <span class="spectrum-ActionButton-label">Solid Black</span>
-                </button>
+    <sp-theme color="light" scale="medium">
+        <div class="main-container">
+            <header>
+                <sp-heading size="XXL">WebP Animation Optimization</sp-heading>
+                <sp-body size="L">Benchmark report generated by <code>img2webp-rs</code> showcasing enterprise-grade transparency and compression control.</sp-body>
+            </header>
+
+            <div class="controls-card">
+                <div class="control-section">
+                    <sp-detail size="S">CANVAS BACKGROUND</sp-detail>
+                    <sp-action-group compact>
+                        <sp-action-button onclick="setBg('checkered')" selected id="btn-checkered">Checkered</sp-action-button>
+                        <sp-action-button onclick="setBg('image-bg')" id="btn-image">Nature</sp-action-button>
+                        <sp-action-button onclick="setBg('solid-bg')" id="btn-dark">Solid Dark</sp-action-button>
+                        <sp-action-button onclick="setBg('black-bg')" id="btn-black">Solid Black</sp-action-button>
+                    </sp-action-group>
+                </div>
+
+                <sp-divider vertical size="M" style="height: 40px;"></sp-divider>
+
+                <div class="control-section">
+                    <sp-detail size="S">IMAGE RENDERING</sp-detail>
+                    <sp-action-group compact>
+                        <sp-action-button onclick="setRendering('smooth')" selected id="btn-smooth">Smooth</sp-action-button>
+                        <sp-action-button onclick="setRendering('pixelated')" id="btn-pixel">Pixel Perfect</sp-action-button>
+                    </sp-action-group>
+                </div>
             </div>
-            <div class="spectrum-Divider spectrum-Divider--vertical" style="height: 24px;"></div>
-            <div class="control-group">
-                <span class="spectrum-Detail spectrum-Detail--sizeS">RENDERING</span>
-                <button class="spectrum-ActionButton spectrum-ActionButton--quiet" onclick="setRendering('smooth')">
-                    <span class="spectrum-ActionButton-label">Smooth</span>
-                </button>
-                <button class="spectrum-ActionButton spectrum-ActionButton--quiet" onclick="setRendering('pixelated')">
-                    <span class="spectrum-ActionButton-label">Pixel Perfect</span>
-                </button>
+
+            <div class="demo-grid">
+                <!-- Standard -->
+                <sp-card heading="Standard" subheading="Lossless Default">
+                    <div slot="cover-photo" class="benchmark-preview checkered">
+                        <img src="animated.webp" class="benchmark-image">
+                    </div>
+                    <div slot="description">
+                        <sp-body size="S">A high-fidelity baseline with standard compression effort.</sp-body>
+                        <div class="stats-box">
+                            <sp-detail size="S">SIZE: 1.31 MB</sp-detail>
+                            <sp-detail size="S">FLAGS: Default</sp-detail>
+                        </div>
+                    </div>
+                </sp-card>
+
+                <!-- Pixel Perfect -->
+                <sp-card heading="Pixel Perfect" subheading="Professional Grade">
+                    <div slot="cover-photo" class="benchmark-preview checkered">
+                        <img src="animated_perfect.webp" class="benchmark-image">
+                    </div>
+                    <div slot="description">
+                        <sp-body size="S">Preserves RGB data in transparent pixels to avoid rendering artifacts.</sp-body>
+                        <div class="stats-box">
+                            <sp-detail size="S">SIZE: 1.40 MB</sp-detail>
+                            <sp-detail size="S">FLAGS: <code>-lossless -exact</code></sp-detail>
+                        </div>
+                    </div>
+                </sp-card>
+
+                <!-- Extreme Slow -->
+                <sp-card heading="Extreme Slow" subheading="Method 6 Optimization">
+                    <div slot="cover-photo" class="benchmark-preview checkered">
+                        <img src="animated_slowest.webp" class="benchmark-image">
+                    </div>
+                    <div slot="description">
+                        <sp-body size="S">Deep exhaustive search for the smallest bitstream using M6 effort.</sp-body>
+                        <div class="stats-box">
+                            <sp-detail size="S">SIZE: 1.38 MB</sp-detail>
+                            <sp-detail size="S">FLAGS: <code>-m 6 -alpha_filter 2</code></sp-detail>
+                        </div>
+                    </div>
+                </sp-card>
+
+                <!-- Optimized Small -->
+                <sp-card heading="Optimized Small" subheading="Efficient Assets">
+                    <div slot="cover-photo" class="benchmark-preview checkered">
+                        <img src="animated_small.webp" class="benchmark-image">
+                    </div>
+                    <div slot="description">
+                        <sp-body size="S">Mixed mode with reduced alpha quality for massive bandwidth savings.</sp-body>
+                        <div class="stats-box">
+                            <sp-detail size="S">SIZE: 203 KB</sp-detail>
+                            <sp-detail size="S">FLAGS: <code>-mixed -alpha_q 50</code></sp-detail>
+                        </div>
+                    </div>
+                </sp-card>
+
+                <!-- Near Lossless -->
+                <sp-card heading="Near Lossless" subheading="Perceptual Precision">
+                    <div slot="cover-photo" class="benchmark-preview checkered">
+                        <img src="animated_near_lossless60.webp" class="benchmark-image">
+                    </div>
+                    <div slot="description">
+                        <sp-body size="S">Subtle pixel preprocessing for enhanced compression ratios.</sp-body>
+                        <div class="stats-box">
+                            <sp-detail size="S">SIZE: 895 KB</sp-detail>
+                            <sp-detail size="S">FLAGS: <code>-near_lossless 60</code></sp-detail>
+                        </div>
+                    </div>
+                </sp-card>
+
+                <!-- Lossy Low -->
+                <sp-card heading="Lossy Low" subheading="Extreme Compression">
+                    <div slot="cover-photo" class="benchmark-preview checkered">
+                        <img src="animated_lossy_low.webp" class="benchmark-image">
+                    </div>
+                    <div slot="description">
+                        <sp-body size="S">Minimal quality threshold for bandwidth-restricted environments.</sp-body>
+                        <div class="stats-box">
+                            <sp-detail size="S">SIZE: 125 KB</sp-detail>
+                            <sp-detail size="S">FLAGS: <code>-lossy -q 30 -alpha_q 30</code></sp-detail>
+                        </div>
+                    </div>
+                </sp-card>
             </div>
+
+            <footer>
+                <sp-heading size="M">System Capabilities</sp-heading>
+                <sp-divider size="S"></sp-divider>
+                <sp-body size="M" style="margin-top: 24px;">
+                    Our <code>img2webp-rs</code> implementation bridges the gap between low-level WebP capabilities and modern high-level safety. By exposing parameters like <code>alpha_filter</code>, <code>exact</code>, and <code>near_lossless</code>, we empower designers and engineers to create visually stunning animations that respect performance constraints.
+                </sp-body>
+            </footer>
         </div>
-    </div>
-
-    <div class="demo-grid">
-        <!-- Standard -->
-        <div class="spectrum-Card">
-            <div class="benchmark-preview checkered"><img src="animated.webp" class="benchmark-image"></div>
-            <div class="spectrum-Card-body">
-                <div class="spectrum-Card-header">
-                    <div class="spectrum-Card-title">Standard</div>
-                </div>
-                <div class="spectrum-Card-description">Default lossless behavior. Good balance.</div>
-                <div class="spectrum-Body--sizeS" style="margin-top: 12px;">
-                    <span class="stats-label">Size:</span> 1.31 MB<br>
-                    <span class="stats-label">Flags:</span> Default (Lossless)
-                </div>
-            </div>
-        </div>
-
-        <!-- Pixel Perfect -->
-        <div class="spectrum-Card">
-            <div class="benchmark-preview checkered"><img src="animated_perfect.webp" class="benchmark-image"></div>
-            <div class="spectrum-Card-body">
-                <div class="spectrum-Card-header">
-                    <div class="spectrum-Card-title">Pixel Perfect</div>
-                </div>
-                <div class="spectrum-Card-description">Preserves RGB under transparency.</div>
-                <div class="spectrum-Body--sizeS" style="margin-top: 12px;">
-                    <span class="stats-label">Size:</span> 1.40 MB<br>
-                    <span class="stats-label">Flags:</span> <code>-lossless -exact</code>
-                </div>
-            </div>
-        </div>
-
-        <!-- Extreme Slow -->
-        <div class="spectrum-Card">
-            <div class="benchmark-preview checkered"><img src="animated_slowest.webp" class="benchmark-image"></div>
-            <div class="spectrum-Card-body">
-                <div class="spectrum-Card-header">
-                    <div class="spectrum-Card-title">Extreme Slow</div>
-                </div>
-                <div class="spectrum-Card-description">Maximum search effort for small size.</div>
-                <div class="spectrum-Body--sizeS" style="margin-top: 12px;">
-                    <span class="stats-label">Size:</span> 1.38 MB<br>
-                    <span class="stats-label">Flags:</span> <code>-m 6 -alpha_filter 2 -exact</code>
-                </div>
-            </div>
-        </div>
-
-        <!-- Optimized Small -->
-        <div class="spectrum-Card">
-            <div class="benchmark-preview checkered"><img src="animated_small.webp" class="benchmark-image"></div>
-            <div class="spectrum-Card-body">
-                <div class="spectrum-Card-header">
-                    <div class="spectrum-Card-title">Optimized Small</div>
-                </div>
-                <div class="spectrum-Card-description">Aggressive compression for assets.</div>
-                <div class="spectrum-Body--sizeS" style="margin-top: 12px;">
-                    <span class="stats-label">Size:</span> 203 KB<br>
-                    <span class="stats-label">Flags:</span> <code>-min_size -mixed -alpha_q 50</code>
-                </div>
-            </div>
-        </div>
-
-        <!-- Near Lossless -->
-        <div class="spectrum-Card">
-            <div class="benchmark-preview checkered"><img src="animated_near_lossless60.webp" class="benchmark-image"></div>
-            <div class="spectrum-Card-body">
-                <div class="spectrum-Card-header">
-                    <div class="spectrum-Card-title">Near Lossless (60)</div>
-                </div>
-                <div class="spectrum-Card-description">Visually identical, technically lossy.</div>
-                <div class="spectrum-Body--sizeS" style="margin-top: 12px;">
-                    <span class="stats-label">Size:</span> 895 KB<br>
-                    <span class="stats-label">Flags:</span> <code>-near_lossless 60</code>
-                </div>
-            </div>
-        </div>
-
-        <!-- Lossy Low Quality -->
-        <div class="spectrum-Card">
-            <div class="benchmark-preview checkered"><img src="animated_lossy_low.webp" class="benchmark-image"></div>
-            <div class="spectrum-Card-body">
-                <div class="spectrum-Card-header">
-                    <div class="spectrum-Card-title">Lossy Low Quality</div>
-                </div>
-                <div class="spectrum-Card-description">Minimal footprint for bandwidth limits.</div>
-                <div class="spectrum-Body--sizeS" style="margin-top: 12px;">
-                    <span class="stats-label">Size:</span> 125 KB<br>
-                    <span class="stats-label">Flags:</span> <code>-lossy -q 30 -alpha_q 30</code>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="deep-dive-section">
-        <h2 class="spectrum-Heading spectrum-Heading--sizeM">Deep Dive: Optimization Matrix</h2>
-        <div class="spectrum-Divider spectrum-Divider--sizeM" style="margin-bottom: 24px;"></div>
-        
-        <p class="spectrum-Body--sizeM">
-            By exploring the <code>WebPConfig</code> headers and the <code>libwebp</code> implementation, we identified several advanced optimization vectors:
-        </p>
-
-        <ul class="spectrum-Body--sizeM">
-            <li><strong>Alpha Compression Method:</strong> Switches between no compression and lossless compression for the alpha channel. Our tool now exposes this.</li>
-            <li><strong>Alpha Filtering:</strong> "Best" uses complex predictive filtering that significantly improves compression of smooth alpha gradients.</li>
-            <li><strong>Method Search:</strong> Controls the complexity of the compression search. Level 6 is the "Enterprise Grade" setting for maximum compression.</li>
-            <li><strong>Sharp YUV:</strong> A more accurate RGB to YUV conversion that reduces artifacts at high-contrast edges.</li>
-            <li><strong>Mixed Mode:</strong> Allows the encoder to decide frame-by-frame whether lossless or lossy is better.</li>
-            <li><strong>Near Lossless:</strong> Slightly adjusts pixel values to achieve much better compression while appearing nearly identical to the source.</li>
-        </ul>
-    </div>
+    </sp-theme>
 
     <script>
         function setBg(cls) {
             document.querySelectorAll('.benchmark-preview').forEach(el => {
                 el.className = 'benchmark-preview ' + cls;
             });
+            // Update selected state
+            document.querySelectorAll('sp-action-button[id^="btn-"]').forEach(btn => btn.selected = false);
+            const idMap = { 'checkered': 'btn-checkered', 'image-bg': 'btn-image', 'solid-bg': 'btn-dark', 'black-bg': 'btn-black' };
+            document.getElementById(idMap[cls]).selected = true;
         }
+
         function setRendering(cls) {
             document.querySelectorAll('.benchmark-image').forEach(el => {
                 el.className = 'benchmark-image ' + cls;
             });
+            document.getElementById('btn-smooth').selected = (cls === 'smooth');
+            document.getElementById('btn-pixel').selected = (cls === 'pixelated');
         }
     </script>
 </body>
