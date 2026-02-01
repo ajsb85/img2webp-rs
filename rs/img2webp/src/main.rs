@@ -19,7 +19,7 @@ fn main() -> Result<()> {
         }
         if arg == "-version" {
             println!("WebP Encoder version: (linked via libwebp-sys)");
-            println!("Rust img2webp 1.0.8");
+            println!("Rust img2webp 1.0.9");
             return Ok(());
         }
     }
