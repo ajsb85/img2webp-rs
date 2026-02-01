@@ -201,124 +201,124 @@
             <div class="Subhead-description f3">Benchmarks of 9 distinct encoding strategies including temporal sequence manipulation.</div>
         </div>
 
-        <div class="benchmark-grid">
-            <!-- 1. Standard -->
-            <div class="Box Box--benchmark">
-                <div class="preview-stage checkered">
-                    <img src="animated.webp" class="benchmark-img">
+            <div class="benchmark-grid">
+                <!-- 1. Standard -->
+                <div class="Box Box--benchmark">
+                    <div class="preview-stage checkered">
+                        <img src="assets/animated.webp" class="benchmark-img">
+                    </div>
+                    <div class="Box-body p-4">
+                        <h3 class="f4 mb-2">Standard</h3>
+                        <p class="color-fg-muted f6">Industry standard behavior. Optimal balance, but may discard RGB data in Alpha=0 pixels.</p>
+                        <div class="stats-badge mt-3">1.31 MB</div>
+                    </div>
+                    <div class="card-footer"><code class="f6 color-fg-muted">Default</code></div>
                 </div>
-                <div class="Box-body p-4">
-                    <h3 class="f4 mb-2">Standard</h3>
-                    <p class="color-fg-muted f6">Industry standard lossless. Balanced, but may zero-out "invisible" RGB data.</p>
-                    <div class="stats-badge mt-3">1.31 MB</div>
-                </div>
-                <div class="card-footer"><code class="f6 color-fg-muted">Default</code></div>
-            </div>
 
-            <!-- 2. Pixel Perfect -->
-            <div class="Box Box--benchmark">
-                <div class="preview-stage checkered">
-                    <img src="animated_perfect.webp" class="benchmark-img">
+                <!-- 2. Pixel Perfect -->
+                <div class="Box Box--benchmark">
+                    <div class="preview-stage checkered">
+                        <img src="assets/animated_perfect.webp" class="benchmark-img">
+                    </div>
+                    <div class="Box-body p-4">
+                        <h3 class="f4 mb-2">Pixel Perfect</h3>
+                        <p class="color-fg-muted f6">Ensures RGB integrity in Alpha=0 pixels. Critical for clean edges during scaling.</p>
+                        <div class="stats-badge mt-3">1.40 MB</div>
+                    </div>
+                    <div class="card-footer"><code class="f6 color-fg-muted">-lossless -exact</code></div>
                 </div>
-                <div class="Box-body p-4">
-                    <h3 class="f4 mb-2">Pixel Perfect</h3>
-                    <p class="color-fg-muted f6">Preserves raw RGB data at all levels. Essential for preventing dark fringe bleeding.</p>
-                    <div class="stats-badge mt-3">1.40 MB</div>
-                </div>
-                <div class="card-footer"><code class="f6 color-fg-muted">-lossless -exact</code></div>
-            </div>
 
-            <!-- 3. Backward Sequence -->
-            <div class="Box Box--benchmark border-accent shadow-medium">
-                <div class="preview-stage checkered">
-                    <img src="animated_backward.webp" class="benchmark-img">
+                <!-- 3. Backward Sequence -->
+                <div class="Box Box--benchmark border-accent shadow-medium">
+                    <div class="preview-stage checkered">
+                        <img src="assets/animated_backward.webp" class="benchmark-img">
+                    </div>
+                    <div class="Box-body p-4">
+                        <h3 class="f4 mb-2 color-fg-accent">Backward Sequence</h3>
+                        <p class="color-fg-muted f6">Last frame first, first frame last. Reverses the entire temporal flow.</p>
+                        <div class="stats-badge color-bg-accent-emphasis color-fg-on-emphasis mt-3" style="border:none">1.31 MB</div>
+                    </div>
+                    <div class="card-footer"><code class="f6 color-fg-muted">-reverse</code></div>
                 </div>
-                <div class="Box-body p-4">
-                    <h3 class="f4 mb-2 color-fg-accent">Backward Sequence</h3>
-                    <p class="color-fg-muted f6">Last frame first, first frame last. Reverses the entire temporal flow.</p>
-                    <div class="stats-badge color-bg-accent-emphasis color-fg-on-emphasis mt-3" style="border:none">1.31 MB</div>
-                </div>
-                <div class="card-footer"><code class="f6 color-fg-muted">-reverse</code></div>
-            </div>
 
-            <!-- 4. Ping-Pong Loop -->
-            <div class="Box Box--benchmark">
-                <div class="preview-stage checkered">
-                    <img src="animated_pingpong.webp" class="benchmark-img">
+                <!-- 4. Ping-Pong Loop -->
+                <div class="Box Box--benchmark">
+                    <div class="preview-stage checkered">
+                        <img src="assets/animated_pingpong.webp" class="benchmark-img">
+                    </div>
+                    <div class="Box-body p-4">
+                        <h3 class="f4 mb-2">Ping-Pong Loop</h3>
+                        <p class="color-fg-muted f6">Forward then backward. Eliminates the "jump" artifact in infinite loops.</p>
+                        <div class="stats-badge mt-3">2.58 MB</div>
+                    </div>
+                    <div class="card-footer"><code class="f6 color-fg-muted">-pingpong</code></div>
                 </div>
-                <div class="Box-body p-4">
-                    <h3 class="f4 mb-2">Ping-Pong Loop</h3>
-                    <p class="color-fg-muted f6">Forward then backward. Eliminates the "jump" artifact in infinite loops.</p>
-                    <div class="stats-badge mt-3">2.58 MB</div>
-                </div>
-                <div class="card-footer"><code class="f6 color-fg-muted">-pingpong</code></div>
-            </div>
 
-            <!-- 5. Optimized Small -->
-            <div class="Box Box--benchmark">
-                <div class="preview-stage checkered">
-                    <img src="animated_small.webp" class="benchmark-img">
+                <!-- 5. Optimized Small -->
+                <div class="Box Box--benchmark">
+                    <div class="preview-stage checkered">
+                        <img src="assets/animated_small.webp" class="benchmark-img">
+                    </div>
+                    <div class="Box-body p-4">
+                        <h3 class="f4 mb-2">Optimized Small</h3>
+                        <p class="color-fg-muted f6">Intelligent mixed-mode strategy with 50% alpha quality reduction. Best for web.</p>
+                        <div class="stats-badge mt-3">203 KB</div>
+                    </div>
+                    <div class="card-footer"><code class="f6 color-fg-muted">-mixed -alpha_q 50</code></div>
                 </div>
-                <div class="Box-body p-4">
-                    <h3 class="f4 mb-2">Optimized Small</h3>
-                    <p class="color-fg-muted f6">Intelligent mixed-mode strategy. ~85% reduction with high visual fidelity.</p>
-                    <div class="stats-badge mt-3">203 KB</div>
-                </div>
-                <div class="card-footer"><code class="f6 color-fg-muted">-mixed -alpha_q 50</code></div>
-            </div>
 
-            <!-- 6. Near Lossless -->
-            <div class="Box Box--benchmark">
-                <div class="preview-stage checkered">
-                    <img src="animated_near_lossless60.webp" class="benchmark-img">
+                <!-- 6. Near Lossless -->
+                <div class="Box Box--benchmark">
+                    <div class="preview-stage checkered">
+                        <img src="assets/animated_near_lossless60.webp" class="benchmark-img">
+                    </div>
+                    <div class="Box-body p-4">
+                        <h3 class="f4 mb-2">Near Lossless</h3>
+                        <p class="color-fg-muted f6">Perceptual preprocessing that yielding significant bitstream compression.</p>
+                        <div class="stats-badge mt-3">895 KB</div>
+                    </div>
+                    <div class="card-footer"><code class="f6 color-fg-muted">-near_lossless 60</code></div>
                 </div>
-                <div class="Box-body p-4">
-                    <h3 class="f4 mb-2">Near Lossless</h3>
-                    <p class="color-fg-muted f6">Perceptual preprocessing that yielding significant bitstream compression.</p>
-                    <div class="stats-badge mt-3">895 KB</div>
-                </div>
-                <div class="card-footer"><code class="f6 color-fg-muted">-near_lossless 60</code></div>
-            </div>
 
-            <!-- 7. Extreme Slow -->
-            <div class="Box Box--benchmark">
-                <div class="preview-stage checkered">
-                    <img src="animated_slowest.webp" class="benchmark-img">
+                <!-- 7. Extreme Slow -->
+                <div class="Box Box--benchmark">
+                    <div class="preview-stage checkered">
+                        <img src="assets/animated_slowest.webp" class="benchmark-img">
+                    </div>
+                    <div class="Box-body p-4">
+                        <h3 class="f4 mb-2">Extreme Slow</h3>
+                        <p class="color-fg-muted f6">Maximum exhaustive search (M6) with best predictive spatial alpha filtering.</p>
+                        <div class="stats-badge mt-3">1.38 MB</div>
+                    </div>
+                    <div class="card-footer"><code class="f6 color-fg-muted">-m 6 -alpha_filter 2</code></div>
                 </div>
-                <div class="Box-body p-4">
-                    <h3 class="f4 mb-2">Extreme Slow</h3>
-                    <p class="color-fg-muted f6">Maximum exhaustive search (M6) with best predictive spatial alpha filtering.</p>
-                    <div class="stats-badge mt-3">1.38 MB</div>
-                </div>
-                <div class="card-footer"><code class="f6 color-fg-muted">-m 6 -alpha_filter 2</code></div>
-            </div>
 
-            <!-- 8. Lossy Sharp -->
-            <div class="Box Box--benchmark">
-                <div class="preview-stage checkered">
-                    <img src="animated_lossy.webp" class="benchmark-img">
+                <!-- 8. Lossy Sharp -->
+                <div class="Box Box--benchmark">
+                    <div class="preview-stage checkered">
+                        <img src="assets/animated_lossy.webp" class="benchmark-img">
+                    </div>
+                    <div class="Box-body p-4">
+                        <h3 class="f4 mb-2">Lossy Sharp</h3>
+                        <p class="color-fg-muted f6">High-contrast preservation optimized via the Sharp YUV conversion pipeline.</p>
+                        <div class="stats-badge mt-3">209 KB</div>
+                    </div>
+                    <div class="card-footer"><code class="f6 color-fg-muted">-lossy -q 75 -sharp_yuv</code></div>
                 </div>
-                <div class="Box-body p-4">
-                    <h3 class="f4 mb-2">Lossy Sharp</h3>
-                    <p class="color-fg-muted f6">High-contrast preservation optimized via the Sharp YUV conversion pipeline.</p>
-                    <div class="stats-badge mt-3">209 KB</div>
-                </div>
-                <div class="card-footer"><code class="f6 color-fg-muted">-lossy -q 75 -sharp_yuv</code></div>
-            </div>
 
-            <!-- 9. Lossy Low -->
-            <div class="Box Box--benchmark">
-                <div class="preview-stage checkered">
-                    <img src="animated_lossy_low.webp" class="benchmark-img">
+                <!-- 9. Lossy Low -->
+                <div class="Box Box--benchmark">
+                    <div class="preview-stage checkered">
+                        <img src="assets/animated_lossy_low.webp" class="benchmark-img">
+                    </div>
+                    <div class="Box-body p-4">
+                        <h3 class="f4 mb-2">Lossy Low</h3>
+                        <p class="color-fg-muted f6">Absolute footprint floor for bandwidth constraints. Noticeable artifacts.</p>
+                        <div class="stats-badge mt-3">125 KB</div>
+                    </div>
+                    <div class="card-footer"><code class="f6 color-fg-muted">-q 30 -alpha_q 30</code></div>
                 </div>
-                <div class="Box-body p-4">
-                    <h3 class="f4 mb-2">Lossy Low</h3>
-                    <p class="color-fg-muted f6">Absolute footprint floor for bandwidth constraints. Noticeable artifacts.</p>
-                    <div class="stats-badge mt-3">125 KB</div>
-                </div>
-                <div class="card-footer"><code class="f6 color-fg-muted">-q 30 -alpha_q 30</code></div>
             </div>
-        </div>
 
         <!-- Technical Architecture Section -->
         <div class="mt-8" id="technical-architecture">
