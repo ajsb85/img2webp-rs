@@ -9,6 +9,12 @@
     <link href="https://unpkg.com/@primer/css@22.1.0/dist/primer.css" rel="stylesheet" />
 
     <style>
+        :root {
+            --card-radius: 12px;
+            --material-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08);
+            --material-shadow-hover: 0 10px 20px rgba(0,0,0,0.1), 0 6px 6px rgba(0,0,0,0.05);
+        }
+
         body {
             background-color: var(--color-canvas-subtle);
             min-height: 100vh;
@@ -23,22 +29,36 @@
             border-bottom: 1px solid var(--color-border-default);
         }
 
-        .page-content {
-            flex: 1;
+        /* Hybrid Card Style: Material Structure + Primer Aesthetics */
+        .Box--benchmark {
+            border-radius: var(--card-radius) !important;
+            border: 1px solid var(--color-border-default);
+            box-shadow: var(--material-shadow);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-color: var(--color-canvas-default);
+        }
+
+        .Box--benchmark:hover {
+            box-shadow: var(--material-shadow-hover);
+            transform: translateY(-4px);
+            border-color: var(--color-accent-emphasis);
         }
 
         /* Benchmark Preview Area */
         .preview-container {
             position: relative;
-            height: 280px;
+            height: 240px;
             display: flex;
             justify-content: center;
             align-items: center;
             background-color: var(--color-canvas-inset);
             overflow: hidden;
-            border-bottom: 1px solid var(--color-border-default);
             background-size: 20px 20px;
-            transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: background 0.3s ease;
         }
 
         /* Transparency Backgrounds */
@@ -67,26 +87,16 @@
 
         .pixelated { image-rendering: pixelated; }
 
-        .Box--benchmark {
-            transition: box-shadow 0.2s ease, transform 0.2s ease;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-        .Box--benchmark:hover {
-            box-shadow: var(--color-shadow-medium);
-            transform: translateY(-2px);
-        }
-
         .stats-badge {
             display: inline-flex;
             align-items: center;
-            padding: 4px 10px;
+            padding: 4px 12px;
             background: var(--color-canvas-subtle);
             border: 1px solid var(--color-border-default);
-            border-radius: 100px;
+            border-radius: 6px;
             font-size: 12px;
             font-family: var(--fontStack-monospace);
+            font-weight: 600;
         }
 
         .sticky-toolbar {
@@ -96,17 +106,14 @@
             background-color: var(--color-canvas-default);
             border-bottom: 1px solid var(--color-border-default);
             padding: 12px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
 
-        .sidebar-nav .SideNav-item[aria-current="page"] {
-            border-left-color: var(--color-accent-fg);
-        }
-
-        /* Layout Grid */
         .benchmark-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-            gap: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 32px;
+            padding: 24px 0;
         }
 
         .flash-container {
@@ -115,6 +122,13 @@
             right: 24px;
             z-index: 1000;
             min-width: 300px;
+        }
+
+        .card-footer {
+            padding: 12px 16px;
+            border-top: 1px solid var(--color-border-muted);
+            background-color: var(--color-canvas-subtle);
+            margin-top: auto;
         }
     </style>
 </head>
@@ -132,7 +146,7 @@
                 <nav class="d-flex">
                     <a class="Header-link mr-3" href="https://github.com/ajsb85/img2webp-rs">Repository</a>
                     <a class="Header-link mr-3" href="https://github.com/ajsb85/img2webp-rs/releases">Releases</a>
-                    <a class="Header-link" href="https://ajsb85.github.io/img2webp-rs/">Benchmarks</a>
+                    <a class="Header-link" href="#">Benchmarks</a>
                 </nav>
             </div>
             <div class="Header-item mr-0">
@@ -143,157 +157,161 @@
 
     <div class="flash-container" id="flash-container"></div>
 
-    <div class="page-content container-xl px-3 pt-6">
-        <div class="Layout Layout--sidebarPosition-start Layout--sidebar-narrow">
-            <!-- Sidebar -->
-            <div class="Layout-sidebar">
-                <nav class="SideNav sidebar-nav border shadow-sm color-bg-default" style="border-radius: 6px;">
-                    <a class="SideNav-item" href="#overview" aria-current="page">Overview</a>
-                    <a class="SideNav-item" href="#benchmarks">Benchmarks</a>
-                    <a class="SideNav-item" href="#deep-dive">Technical Deep Dive</a>
-                    <a class="SideNav-item" href="#usage">Usage Examples</a>
-                </nav>
-
-                <div class="Box mt-4 shadow-sm">
-                    <div class="Box-header">
-                        <h3 class="Box-title">System Theme</h3>
-                    </div>
-                    <div class="Box-body">
-                        <p class="f6 color-fg-muted mb-2">Synchronized with your OS preferences.</p>
-                        <span class="Label Label--large" id="theme-status">Detecting...</span>
-                    </div>
+    <div class="sticky-toolbar">
+        <div class="container-xl px-3 d-flex flex-items-center flex-justify-between flex-wrap">
+            <div class="d-flex flex-items-center mr-4 py-2">
+                <span class="text-bold f6 color-fg-muted mr-3">CANVAS BACKGROUND</span>
+                <div class="BtnGroup">
+                    <button class="btn BtnGroup-item btn-sm" type="button" onclick="setBg('checkered')" id="btn-checkered">Checkered</button>
+                    <button class="btn BtnGroup-item btn-sm" type="button" onclick="setBg('image-bg')" id="btn-image">Nature</button>
+                    <button class="btn BtnGroup-item btn-sm" type="button" onclick="setBg('solid-bg')" id="btn-dark">Solid Dark</button>
+                    <button class="btn BtnGroup-item btn-sm" type="button" onclick="setBg('black-bg')" id="btn-black">Black</button>
                 </div>
             </div>
-
-            <!-- Main Content -->
-            <div class="Layout-main">
-                <div class="Subhead mb-4" id="overview">
-                    <div class="Subhead-heading f0-light">WebP Optimization Analysis</div>
-                    <div class="Subhead-description">Comprehensive benchmarking of enterprise-grade animation strategies.</div>
-                </div>
-
-                <!-- Sticky Controls -->
-                <div class="Box mb-6 shadow-sm sticky-toolbar px-3 border-accent">
-                    <div class="d-flex flex-items-center flex-justify-between flex-wrap">
-                        <div class="d-flex flex-items-center mr-4 py-2">
-                            <span class="text-bold f6 color-fg-muted mr-3">BACKGROUND</span>
-                            <div class="BtnGroup">
-                                <button class="btn BtnGroup-item btn-sm" type="button" onclick="setBg('checkered')" id="btn-checkered">Checkered</button>
-                                <button class="btn BtnGroup-item btn-sm" type="button" onclick="setBg('image-bg')" id="btn-image">Nature</button>
-                                <button class="btn BtnGroup-item btn-sm" type="button" onclick="setBg('solid-bg')" id="btn-dark">Dark Blue</button>
-                                <button class="btn BtnGroup-item btn-sm" type="button" onclick="setBg('black-bg')" id="btn-black">Black</button>
-                            </div>
-                        </div>
-                        
-                        <div class="d-flex flex-items-center py-2">
-                            <span class="text-bold f6 color-fg-muted mr-3">RENDERING</span>
-                            <div class="BtnGroup">
-                                <button class="btn BtnGroup-item btn-sm" type="button" onclick="setRendering('smooth')" id="btn-smooth">Standard</button>
-                                <button class="btn BtnGroup-item btn-sm" type="button" onclick="setRendering('pixelated')" id="btn-pixel">Pixel Perfect</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="benchmark-grid" id="benchmarks">
-                    <!-- Standard -->
-                    <div class="Box Box--benchmark shadow-sm">
-                        <div class="preview-container checkered">
-                            <img src="animated.webp" class="benchmark-img">
-                        </div>
-                        <div class="Box-body d-flex flex-column flex-1">
-                            <div class="d-flex flex-items-center mb-2">
-                                <h3 class="f4 mr-2">Standard</h3>
-                                <span class="Label">Default</span>
-                            </div>
-                            <p class="color-fg-muted f6 flex-1">Industry standard lossless behavior. Optimal balance for general use.</p>
-                            <div class="d-flex flex-items-center flex-wrap gap-2 mt-3">
-                                <div class="stats-badge">1.31 MB</div>
-                                <code class="f6 color-fg-muted">Default</code>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Pixel Perfect -->
-                    <div class="Box Box--benchmark shadow-sm">
-                        <div class="preview-container checkered">
-                            <img src="animated_perfect.webp" class="benchmark-img">
-                        </div>
-                        <div class="Box-body d-flex flex-column flex-1">
-                            <div class="d-flex flex-items-center mb-2">
-                                <h3 class="f4 mr-2">Pixel Perfect</h3>
-                                <span class="Label Label--success">Exact</span>
-                            </div>
-                            <p class="color-fg-muted f6 flex-1">Ensures transparency integrity by preserving RGB data in Alpha=0 pixels.</p>
-                            <div class="d-flex flex-items-center flex-wrap gap-2 mt-3">
-                                <div class="stats-badge">1.40 MB</div>
-                                <code class="f6 color-fg-muted">-lossless -exact</code>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Optimized Small -->
-                    <div class="Box Box--benchmark shadow-sm border-accent">
-                        <div class="preview-container checkered">
-                            <img src="animated_small.webp" class="benchmark-img">
-                        </div>
-                        <div class="Box-body d-flex flex-column flex-1">
-                            <div class="d-flex flex-items-center mb-2">
-                                <h3 class="f4 mr-2 color-fg-accent">Optimized Small</h3>
-                                <span class="Label Label--accent">Recommended</span>
-                            </div>
-                            <p class="color-fg-muted f6 flex-1">Mixed-mode strategy with intelligent alpha reduction. ~85% size saving.</p>
-                            <div class="d-flex flex-items-center flex-wrap gap-2 mt-3">
-                                <div class="stats-badge color-bg-accent-emphasis color-fg-on-emphasis">203 KB</div>
-                                <code class="f6 color-fg-muted">-mixed -alpha_q 50</code>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Near Lossless -->
-                    <div class="Box Box--benchmark shadow-sm">
-                        <div class="preview-container checkered">
-                            <img src="animated_near_lossless60.webp" class="benchmark-img">
-                        </div>
-                        <div class="Box-body d-flex flex-column flex-1">
-                            <div class="d-flex flex-items-center mb-2">
-                                <h3 class="f4 mr-2">Near Lossless</h3>
-                                <span class="Label">Hybrid</span>
-                            </div>
-                            <p class="color-fg-muted f6 flex-1">Advanced pixel preprocessing that yields significant compression gains.</p>
-                            <div class="d-flex flex-items-center flex-wrap gap-2 mt-3">
-                                <div class="stats-badge">895 KB</div>
-                                <code class="f6 color-fg-muted">-near_lossless 60</code>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="Subhead mt-8 mb-4" id="deep-dive">
-                    <div class="Subhead-heading">Technical Architecture</div>
-                </div>
-                
-                <div class="markdown-body">
-                    <p>By leveraging the <code>libwebp</code> muxing engine through a safe Rust FFI, <code>img2webp-rs</code> provides controls previously only available in low-level C utilities.</p>
-                    <ul>
-                        <li><strong>Alpha Filtering:</strong> Reduces entropy in transparency channels via spatial prediction.</li>
-                        <li><strong>Sharp YUV:</strong> Minimizes color bleeding in high-contrast transitions.</li>
-                        <li><strong>M6 Complexity:</strong> Enables the highest exhaustive search for optimal bitstream representation.</li>
-                    </ul>
+            
+            <div class="d-flex flex-items-center py-2">
+                <span class="text-bold f6 color-fg-muted mr-3">RENDERING</span>
+                <div class="BtnGroup">
+                    <button class="btn BtnGroup-item btn-sm" type="button" onclick="setRendering('smooth')" id="btn-smooth">Standard</button>
+                    <button class="btn BtnGroup-item btn-sm" type="button" onclick="setRendering('pixelated')" id="btn-pixel">Pixel Perfect</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <footer class="footer mt-8 py-6 border-top color-bg-subtle">
+    <main class="container-xl px-3 pt-6 pb-8">
+        <div class="Subhead mb-4">
+            <div class="Subhead-heading f0-light">Optimization Benchmarks</div>
+            <div class="Subhead-description">Comparing 7 distinct encoding strategies for transparent WebP animations.</div>
+        </div>
+
+        <div class="benchmark-grid">
+            <!-- 1. Standard -->
+            <div class="Box Box--benchmark">
+                <div class="preview-container checkered">
+                    <img src="animated.webp" class="benchmark-img">
+                </div>
+                <div class="Box-body p-4">
+                    <h3 class="f4 mb-2">Standard</h3>
+                    <p class="color-fg-muted f6">The baseline baseline behavior. Reliable industry standard.</p>
+                    <div class="stats-badge mt-3">1.31 MB</div>
+                </div>
+                <div class="card-footer">
+                    <code class="f6 color-fg-muted">Default</code>
+                </div>
+            </div>
+
+            <!-- 2. Pixel Perfect -->
+            <div class="Box Box--benchmark">
+                <div class="preview-container checkered">
+                    <img src="animated_perfect.webp" class="benchmark-img">
+                </div>
+                <div class="Box-body p-4">
+                    <h3 class="f4 mb-2">Pixel Perfect</h3>
+                    <p class="color-fg-muted f6">Preserves RGB data in Alpha=0 pixels to prevent edge bleeding.</p>
+                    <div class="stats-badge mt-3">1.40 MB</div>
+                </div>
+                <div class="card-footer">
+                    <code class="f6 color-fg-muted">-lossless -exact</code>
+                </div>
+            </div>
+
+            <!-- 3. Extreme Slow -->
+            <div class="Box Box--benchmark">
+                <div class="preview-container checkered">
+                    <img src="animated_slowest.webp" class="benchmark-img">
+                </div>
+                <div class="Box-body p-4">
+                    <h3 class="f4 mb-2">Extreme Slow</h3>
+                    <p class="color-fg-muted f6">Maximum exhaustive search (M6) for the smallest possible bitstream.</p>
+                    <div class="stats-badge mt-3">1.38 MB</div>
+                </div>
+                <div class="card-footer">
+                    <code class="f6 color-fg-muted">-m 6 -alpha_filter 2</code>
+                </div>
+            </div>
+
+            <!-- 4. Optimized Small -->
+            <div class="Box Box--benchmark border-accent shadow-medium">
+                <div class="preview-container checkered">
+                    <img src="animated_small.webp" class="benchmark-img">
+                </div>
+                <div class="Box-body p-4">
+                    <h3 class="f4 mb-2 color-fg-accent">Optimized Small</h3>
+                    <p class="color-fg-muted f6">Mixed-mode with reduced alpha quality. Recommended for web assets.</p>
+                    <div class="stats-badge color-bg-accent-emphasis color-fg-on-emphasis mt-3">203 KB</div>
+                </div>
+                <div class="card-footer">
+                    <code class="f6 color-fg-muted">-mixed -alpha_q 50</code>
+                </div>
+            </div>
+
+            <!-- 5. Near Lossless -->
+            <div class="Box Box--benchmark">
+                <div class="preview-container checkered">
+                    <img src="animated_near_lossless60.webp" class="benchmark-img">
+                </div>
+                <div class="Box-body p-4">
+                    <h3 class="f4 mb-2">Near Lossless</h3>
+                    <p class="color-fg-muted f6">Perceptual optimization that alters pixels for high compression ratios.</p>
+                    <div class="stats-badge mt-3">895 KB</div>
+                </div>
+                <div class="card-footer">
+                    <code class="f6 color-fg-muted">-near_lossless 60</code>
+                </div>
+            </div>
+
+            <!-- 6. Lossy Sharp -->
+            <div class="Box Box--benchmark">
+                <div class="preview-container checkered">
+                    <img src="animated_lossy.webp" class="benchmark-img">
+                </div>
+                <div class="Box-body p-4">
+                    <h3 class="f4 mb-2">Lossy Sharp</h3>
+                    <p class="color-fg-muted f6">High contrast preservation using Sharp YUV conversion.</p>
+                    <div class="stats-badge mt-3">209 KB</div>
+                </div>
+                <div class="card-footer">
+                    <code class="f6 color-fg-muted">-lossy -q 75 -sharp_yuv</code>
+                </div>
+            </div>
+
+            <!-- 7. Lossy Low -->
+            <div class="Box Box--benchmark">
+                <div class="preview-container checkered">
+                    <img src="animated_lossy_low.webp" class="benchmark-img">
+                </div>
+                <div class="Box-body p-4">
+                    <h3 class="f4 mb-2">Lossy Low</h3>
+                    <p class="color-fg-muted f6">Minimal footprint for bandwidth-starved environments.</p>
+                    <div class="stats-badge mt-3">125 KB</div>
+                </div>
+                <div class="card-footer">
+                    <code class="f6 color-fg-muted">-q 30 -alpha_q 30</code>
+                </div>
+            </div>
+        </div>
+
+        <div class="Subhead mt-8 mb-4">
+            <div class="Subhead-heading">System Integration</div>
+        </div>
+        <div class="markdown-body">
+            <p>Our benchmark interface is built with a hybrid design system combining the structure of <strong>Material Design</strong> with the aesthetic of <strong>GitHub Primer</strong>.</p>
+            <ul>
+                <li><strong>Elevation:</strong> Uses depth shadows to distinguish interactive elements.</li>
+                <li><strong>Theming:</strong> Fully synchronized with your system's light or dark mode.</li>
+                <li><strong>Functionality:</strong> Real-time toggle of backgrounds to verify transparency.</li>
+            </ul>
+        </div>
+    </main>
+
+    <footer class="footer mt-auto py-6 border-top color-bg-subtle">
         <div class="container-xl px-3 d-flex flex-justify-between flex-items-center">
             <div class="d-flex flex-items-center">
                 <svg height="24" class="octicon octicon-mark-github mr-3 color-fg-muted" viewBox="0 0 16 16" version="1.1" width="24"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
-                <span class="f6 color-fg-muted">&copy; 2026 img2webp-rs. Built with Primer.</span>
+                <span class="f6 color-fg-muted">&copy; 2026 img2webp-rs. Hybrid Design (Material + Primer).</span>
             </div>
             <nav class="d-flex">
-                <a class="Link--secondary f6 mr-3" href="#">Terms</a>
-                <a class="Link--secondary f6 mr-3" href="#">Privacy</a>
                 <a class="Link--secondary f6" href="https://github.com/ajsb85/img2webp-rs">Source Code</a>
             </nav>
         </div>
@@ -304,12 +322,17 @@
             const container = document.getElementById('flash-container');
             const flash = document.createElement('div');
             flash.className = 'flash flash-success mb-3 shadow-sm anim-fade-in';
+            flash.style.borderRadius = '8px';
             flash.innerHTML = `
                 <svg class="octicon octicon-check" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>
                 ${message}
             `;
             container.appendChild(flash);
-            setTimeout(() => { flash.style.opacity = '0'; setTimeout(() => flash.remove(), 500); }, 2000);
+            setTimeout(() => { 
+                flash.style.opacity = '0'; 
+                flash.style.transform = 'translateX(20px)';
+                setTimeout(() => flash.remove(), 500); 
+            }, 2000);
         }
 
         function setBg(cls) {
@@ -320,7 +343,7 @@
             const idMap = { 'checkered': 'btn-checkered', 'image-bg': 'btn-image', 'solid-bg': 'btn-dark', 'black-bg': 'btn-black' };
             const active = document.getElementById(idMap[cls]);
             if (active) active.classList.add('btn-primary');
-            showFlash(`Canvas background set to ${cls.replace('-', ' ')}`);
+            showFlash(`Background: ${cls.replace('-', ' ')}`);
         }
 
         function setRendering(cls) {
@@ -329,18 +352,8 @@
             });
             document.getElementById('btn-smooth').classList.toggle('btn-primary', cls === 'smooth');
             document.getElementById('btn-pixel').classList.toggle('btn-primary', cls === 'pixelated');
-            showFlash(`Rendering engine switched to ${cls === 'smooth' ? 'Standard' : 'Pixel Perfect'}`);
+            showFlash(`Engine: ${cls === 'smooth' ? 'Standard' : 'Pixel Perfect'}`);
         }
-
-        function updateThemeStatus() {
-            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const status = document.getElementById('theme-status');
-            status.textContent = isDark ? 'Dark Mode' : 'Light Mode';
-            status.className = `Label Label--large ${isDark ? 'Label--secondary' : 'Label--accent'}`;
-        }
-
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateThemeStatus);
-        updateThemeStatus();
 
         // Initialize defaults
         setBg('checkered');
