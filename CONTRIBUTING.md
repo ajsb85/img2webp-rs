@@ -24,6 +24,8 @@ make generate # Re-generate all benchmark animations to verify no visual regress
 
 ## Release & Deployment (Maintainers only)
 
+The project relies on a **Pure Makefile Workflow**. GitHub Actions is disabled to ensure all releases are built and signed in a controlled, local environment.
+
 ### Updating the Live Demo
 To update the GitHub Pages site with new code or frames:
 ```bash
@@ -31,15 +33,16 @@ make deploy
 ```
 
 ### Publishing a New Version
-To perform a full, GPG-signed, multi-platform release:
+To perform a full, GPG-signed release with binary artifacts:
 ```bash
 make release VERSION=v1.0.0
 ```
 This command:
-1.  Runs all quality checks.
-2.  Creates a **GPG-signed git tag**.
-3.  Pushes the tag to GitHub, triggering **GitHub Actions**.
-4.  GitHub Actions automatically builds and signs binaries for **Linux**, **Windows**, and **macOS** (x64).
+1.  Runs all quality checks (`clippy`, `rustfmt`, `tests`).
+2.  Builds the production-ready release binary.
+3.  Creates a **GPG-signed git tag**.
+4.  Generates a GPG detached signature (`.asc`) for the binary.
+5.  Creates a GitHub release and uploads both the **binary** and the **signature**.
 
 ## Development Setup
 Ensure you have the following installed:

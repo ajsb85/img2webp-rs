@@ -70,25 +70,25 @@ deploy: check generate
 	@git push origin main
 	@echo "Deployment complete. Visit: https://ajsb85.github.io/img2webp-rs/"
 
-# Create a GPG-signed release on GitHub with multi-platform support
+# Create a GPG-signed release on GitHub (Pure Makefile Approach)
 # Usage: make release VERSION=v1.0.0
 .PHONY: release
 release:
 	@if [ -z "$(VERSION)" ]; then echo "Error: VERSION is not set. Usage: make release VERSION=v1.0.0"; exit 1; fi
 	@echo "Performing pre-release checks..."
 	@make check
-	@echo "Tagging version $(VERSION)..."
+	@make build
+	@echo "Signing tag $(VERSION)..."
 	@git tag -s $(VERSION) -m "Release $(VERSION)"
 	@git push origin $(VERSION)
-	@echo "Triggering multi-platform build via GitHub Actions..."
-	@echo "Release $(VERSION) is being processed. Binaries for Linux, Windows, and macOS will appear shortly."
-	@echo "Visit: https://github.com/ajsb85/img2webp-rs/releases/tag/$(VERSION)"
-
-# Local signing of specific artifacts (for manual override)
-.PHONY: sign
-sign: build
-	@echo "Signing Linux binary..."
+	@echo "Signing binary..."
+	@rm -f $(BINARY_PATH).asc
 	@gpg --armor --detach-sign $(BINARY_PATH)
+	@echo "Creating GitHub release and uploading artifacts..."
+	@gh release create $(VERSION) $(BINARY_PATH) $(BINARY_PATH).asc \
+		--title "$(VERSION)" \
+		--notes "Release $(VERSION) generated and signed via Makefile. Includes multi-format support and advanced optimization controls."
+	@echo "Release $(VERSION) published successfully with signed artifacts."
 
 # Help target
 .PHONY: help
@@ -100,6 +100,6 @@ help:
 	@echo "  make lint            - Auto-fix lints and format code"
 	@echo "  make check           - Comprehensive Lint + Test"
 	@echo "  make deploy          - Check, Generate Assets, and Push to GH Pages"
-	@echo "  make release VERSION=vX.Y.Z - Tag and trigger Multi-Platform release"
+	@echo "  make release VERSION=vX.Y.Z - Tag, Sign, and Publish Release"
 	@echo "  make clean           - Remove all build and asset artifacts"
 	@echo "  make all             - Build and generate (default)"
