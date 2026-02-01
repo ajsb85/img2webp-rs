@@ -1,55 +1,67 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="spectrum spectrum--light spectrum--medium">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebP Animation Optimization Benchmarks</title>
+    <title>WebP Animation Optimization Benchmarks | img2webp-rs</title>
+
+    <!-- Spectrum CSS Tokens -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@spectrum-css/tokens@latest/dist/spectrum-global.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@spectrum-css/tokens@latest/dist/spectrum-medium.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@spectrum-css/tokens@latest/dist/spectrum-light.css">
+
+    <!-- Spectrum CSS Standalone Bundle -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@adobe/spectrum-css@latest/dist/standalone/spectrum-css-standalone.min.css">
+
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding: 20px;
-            background: #f0f0f0;
+            padding: 40px;
+            background-color: var(--spectrum-global-color-gray-100);
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-        h1 { color: #333; }
-        .controls {
-            margin-bottom: 20px;
-            padding: 15px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 10px;
-            z-index: 100;
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 40px;
+            max-width: 800px;
         }
+
+        .controls-container {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 16px;
+            background: var(--spectrum-global-color-gray-50);
+            border-radius: var(--spectrum-global-dimension-static-size-100);
+            box-shadow: var(--spectrum-global-dimension-static-size-10) var(--spectrum-global-dimension-static-size-10) var(--spectrum-global-dimension-static-size-40) rgba(0,0,0,0.05);
+        }
+
         .demo-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 32px;
             width: 100%;
             max-width: 1200px;
         }
-        .card {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        .demo-container {
+
+        /* Custom Card Preview area to house the backgrounds */
+        .benchmark-preview {
             position: relative;
-            height: 300px;
-            border: 2px solid #333;
-            border-radius: 4px;
-            overflow: hidden;
-            background-size: 20px 20px;
+            height: 240px;
+            background-color: white;
             display: flex;
             justify-content: center;
             align-items: center;
+            border-bottom: 1px solid var(--spectrum-global-color-gray-200);
+            overflow: hidden;
+            background-size: 20px 20px;
         }
+
         /* Background Types */
         .checkered {
             background-image:
@@ -67,101 +79,186 @@
         .solid-bg { background: #2c3e50; }
         .black-bg { background: #000000; }
         
-        img { max-width: 100%; height: auto; display: block; }
-        .pixelated { image-rendering: pixelated; }
+        .benchmark-image {
+            max-width: 90%;
+            max-height: 90%;
+            display: block;
+        }
         
-        .stats {
-            margin-top: 10px;
-            font-size: 0.9em;
-            color: #666;
-            background: #f9f9f9;
-            padding: 5px;
-            border-radius: 4px;
+        .pixelated { image-rendering: pixelated; }
+
+        .deep-dive-section {
+            margin-top: 60px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .stats-label {
+            font-weight: bold;
+            color: var(--spectrum-global-color-gray-700);
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
     </style>
 </head>
-<body>
+<body class="spectrum-Body">
 
-    <h1>WebP Animation Optimization Benchmarks</h1>
-
-    <div class="controls">
-        <label>Background: </label>
-        <button onclick="setBg('checkered')">Checkered</button>
-        <button onclick="setBg('image-bg')">Nature</button>
-        <button onclick="setBg('solid-bg')">Solid Dark</button>
-        <button onclick="setBg('black-bg')">Solid Black</button>
-        |
-        <label>Rendering: </label>
-        <button onclick="setRendering('smooth')">Smooth</button>
-        <button onclick="setRendering('pixelated')">Pixel Perfect</button>
+    <div class="header-section">
+        <h1 class="spectrum-Heading spectrum-Heading--sizeXXL">WebP Animation Benchmarks</h1>
+        <p class="spectrum-Body--sizeL">Experimental results from <code>img2webp-rs</code> showcasing transparency handling and optimization strategies.</p>
+        
+        <div class="controls-container">
+            <div class="control-group">
+                <span class="spectrum-Detail spectrum-Detail--sizeS">BACKGROUND</span>
+                <button class="spectrum-ActionButton spectrum-ActionButton--quiet" onclick="setBg('checkered')">
+                    <span class="spectrum-ActionButton-label">Checkered</span>
+                </button>
+                <button class="spectrum-ActionButton spectrum-ActionButton--quiet" onclick="setBg('image-bg')">
+                    <span class="spectrum-ActionButton-label">Nature</span>
+                </button>
+                <button class="spectrum-ActionButton spectrum-ActionButton--quiet" onclick="setBg('solid-bg')">
+                    <span class="spectrum-ActionButton-label">Solid Dark</span>
+                </button>
+                <button class="spectrum-ActionButton spectrum-ActionButton--quiet" onclick="setBg('black-bg')">
+                    <span class="spectrum-ActionButton-label">Solid Black</span>
+                </button>
+            </div>
+            <div class="spectrum-Divider spectrum-Divider--vertical" style="height: 24px;"></div>
+            <div class="control-group">
+                <span class="spectrum-Detail spectrum-Detail--sizeS">RENDERING</span>
+                <button class="spectrum-ActionButton spectrum-ActionButton--quiet" onclick="setRendering('smooth')">
+                    <span class="spectrum-ActionButton-label">Smooth</span>
+                </button>
+                <button class="spectrum-ActionButton spectrum-ActionButton--quiet" onclick="setRendering('pixelated')">
+                    <span class="spectrum-ActionButton-label">Pixel Perfect</span>
+                </button>
+            </div>
+        </div>
     </div>
 
     <div class="demo-grid">
-        <div class="card">
-            <h3>Standard</h3>
-            <div class="demo-container checkered"><img src="animated.webp"></div>
-            <div class="stats">Size: ~1.31 MB<br>Flags: Default (Lossless)</div>
+        <!-- Standard -->
+        <div class="spectrum-Card">
+            <div class="benchmark-preview checkered"><img src="animated.webp" class="benchmark-image"></div>
+            <div class="spectrum-Card-body">
+                <div class="spectrum-Card-header">
+                    <div class="spectrum-Card-title">Standard</div>
+                </div>
+                <div class="spectrum-Card-description">Default lossless behavior. Good balance.</div>
+                <div class="spectrum-Body--sizeS" style="margin-top: 12px;">
+                    <span class="stats-label">Size:</span> 1.31 MB<br>
+                    <span class="stats-label">Flags:</span> Default (Lossless)
+                </div>
+            </div>
         </div>
 
-        <div class="card">
-            <h3>Pixel Perfect</h3>
-            <div class="demo-container checkered"><img src="animated_perfect.webp"></div>
-            <div class="stats">Size: ~1.40 MB<br>Flags: <code>-lossless -exact</code></div>
+        <!-- Pixel Perfect -->
+        <div class="spectrum-Card">
+            <div class="benchmark-preview checkered"><img src="animated_perfect.webp" class="benchmark-image"></div>
+            <div class="spectrum-Card-body">
+                <div class="spectrum-Card-header">
+                    <div class="spectrum-Card-title">Pixel Perfect</div>
+                </div>
+                <div class="spectrum-Card-description">Preserves RGB under transparency.</div>
+                <div class="spectrum-Body--sizeS" style="margin-top: 12px;">
+                    <span class="stats-label">Size:</span> 1.40 MB<br>
+                    <span class="stats-label">Flags:</span> <code>-lossless -exact</code>
+                </div>
+            </div>
         </div>
 
-        <div class="card">
-            <h3>Extreme Slow (M6)</h3>
-            <div class="demo-container checkered"><img src="animated_slowest.webp"></div>
-            <div class="stats">Size: ~1.38 MB<br>Flags: <code>-m 6 -alpha_filter 2 -exact</code></div>
+        <!-- Extreme Slow -->
+        <div class="spectrum-Card">
+            <div class="benchmark-preview checkered"><img src="animated_slowest.webp" class="benchmark-image"></div>
+            <div class="spectrum-Card-body">
+                <div class="spectrum-Card-header">
+                    <div class="spectrum-Card-title">Extreme Slow</div>
+                </div>
+                <div class="spectrum-Card-description">Maximum search effort for small size.</div>
+                <div class="spectrum-Body--sizeS" style="margin-top: 12px;">
+                    <span class="stats-label">Size:</span> 1.38 MB<br>
+                    <span class="stats-label">Flags:</span> <code>-m 6 -alpha_filter 2 -exact</code>
+                </div>
+            </div>
         </div>
 
-        <div class="card">
-            <h3>Optimized Small</h3>
-            <div class="demo-container checkered"><img src="animated_small.webp"></div>
-            <div class="stats">Size: ~203 KB<br>Flags: <code>-min_size -mixed -alpha_q 50</code></div>
+        <!-- Optimized Small -->
+        <div class="spectrum-Card">
+            <div class="benchmark-preview checkered"><img src="animated_small.webp" class="benchmark-image"></div>
+            <div class="spectrum-Card-body">
+                <div class="spectrum-Card-header">
+                    <div class="spectrum-Card-title">Optimized Small</div>
+                </div>
+                <div class="spectrum-Card-description">Aggressive compression for assets.</div>
+                <div class="spectrum-Body--sizeS" style="margin-top: 12px;">
+                    <span class="stats-label">Size:</span> 203 KB<br>
+                    <span class="stats-label">Flags:</span> <code>-min_size -mixed -alpha_q 50</code>
+                </div>
+            </div>
         </div>
 
-        <div class="card">
-            <h3>Lossy Sharp</h3>
-            <div class="demo-container checkered"><img src="animated_lossy.webp"></div>
-            <div class="stats">Size: ~209 KB<br>Flags: <code>-lossy -q 75 -sharp_yuv</code></div>
+        <!-- Near Lossless -->
+        <div class="spectrum-Card">
+            <div class="benchmark-preview checkered"><img src="animated_near_lossless60.webp" class="benchmark-image"></div>
+            <div class="spectrum-Card-body">
+                <div class="spectrum-Card-header">
+                    <div class="spectrum-Card-title">Near Lossless (60)</div>
+                </div>
+                <div class="spectrum-Card-description">Visually identical, technically lossy.</div>
+                <div class="spectrum-Body--sizeS" style="margin-top: 12px;">
+                    <span class="stats-label">Size:</span> 895 KB<br>
+                    <span class="stats-label">Flags:</span> <code>-near_lossless 60</code>
+                </div>
+            </div>
         </div>
 
-        <div class="card">
-            <h3>Near Lossless (60)</h3>
-            <div class="demo-container checkered"><img src="animated_near_lossless60.webp"></div>
-            <div class="stats">Size: ~895 KB<br>Flags: <code>-near_lossless 60</code></div>
-        </div>
-
-        <div class="card">
-            <h3>Lossy Low Quality</h3>
-            <div class="demo-container checkered"><img src="animated_lossy_low.webp"></div>
-            <div class="stats">Size: ~125 KB<br>Flags: <code>-lossy -q 30 -alpha_q 30</code></div>
+        <!-- Lossy Low Quality -->
+        <div class="spectrum-Card">
+            <div class="benchmark-preview checkered"><img src="animated_lossy_low.webp" class="benchmark-image"></div>
+            <div class="spectrum-Card-body">
+                <div class="spectrum-Card-header">
+                    <div class="spectrum-Card-title">Lossy Low Quality</div>
+                </div>
+                <div class="spectrum-Card-description">Minimal footprint for bandwidth limits.</div>
+                <div class="spectrum-Body--sizeS" style="margin-top: 12px;">
+                    <span class="stats-label">Size:</span> 125 KB<br>
+                    <span class="stats-label">Flags:</span> <code>-lossy -q 30 -alpha_q 30</code>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div style="margin-top: 40px; max-width: 800px; background: white; padding: 20px; border-radius: 8px;">
-        <h2>Deep Dive: Optimization Matrix</h2>
-        <p>By exploring the <code>WebPConfig</code> headers and the <code>libwebp</code> implementation, we identified several advanced optimization vectors:</p>
-        <ul>
-            <li><strong>Alpha Compression Method (<code>alpha_compression</code>):</strong> Switches between no compression (0) and lossless compression (1) for the alpha channel. Our tool now exposes this.</li>
-            <li><strong>Alpha Filtering (<code>alpha_filter</code>):</strong> 0=None, 1=Fast, 2=Best. "Best" uses complex predictive filtering that significantly improves compression of smooth alpha gradients.</li>
-            <li><strong>Method (<code>-m 0-6</code>):</strong> Controls the complexity of the compression search. Level 6 is the "Enterprise Grade" setting for maximum compression, though significantly slower to encode.</li>
-            <li><strong>Sharp YUV (<code>-sharp_yuv</code>):</strong> A more accurate RGB to YUV conversion that reduces artifacts at high-contrast edges, specifically targeting "ghosting" or "halos" in lossy animations.</li>
-            <li><strong>Mixed Mode (<code>-mixed</code>):</strong> Allows the encoder to decide frame-by-frame whether lossless or lossy is better, often achieving the best quality-to-size ratio.</li>
-            <li><strong>Near Lossless (<code>-near_lossless</code>):</strong> A unique WebP feature that slightly adjusts pixel values to achieve much better compression while appearing nearly identical to the source.</li>
+    <div class="deep-dive-section">
+        <h2 class="spectrum-Heading spectrum-Heading--sizeM">Deep Dive: Optimization Matrix</h2>
+        <div class="spectrum-Divider spectrum-Divider--sizeM" style="margin-bottom: 24px;"></div>
+        
+        <p class="spectrum-Body--sizeM">
+            By exploring the <code>WebPConfig</code> headers and the <code>libwebp</code> implementation, we identified several advanced optimization vectors:
+        </p>
+
+        <ul class="spectrum-Body--sizeM">
+            <li><strong>Alpha Compression Method:</strong> Switches between no compression and lossless compression for the alpha channel. Our tool now exposes this.</li>
+            <li><strong>Alpha Filtering:</strong> "Best" uses complex predictive filtering that significantly improves compression of smooth alpha gradients.</li>
+            <li><strong>Method Search:</strong> Controls the complexity of the compression search. Level 6 is the "Enterprise Grade" setting for maximum compression.</li>
+            <li><strong>Sharp YUV:</strong> A more accurate RGB to YUV conversion that reduces artifacts at high-contrast edges.</li>
+            <li><strong>Mixed Mode:</strong> Allows the encoder to decide frame-by-frame whether lossless or lossy is better.</li>
+            <li><strong>Near Lossless:</strong> Slightly adjusts pixel values to achieve much better compression while appearing nearly identical to the source.</li>
         </ul>
     </div>
 
     <script>
         function setBg(cls) {
-            document.querySelectorAll('.demo-container').forEach(el => {
-                el.className = 'demo-container ' + cls;
+            document.querySelectorAll('.benchmark-preview').forEach(el => {
+                el.className = 'benchmark-preview ' + cls;
             });
         }
         function setRendering(cls) {
-            document.querySelectorAll('img').forEach(el => {
-                el.className = cls;
+            document.querySelectorAll('.benchmark-image').forEach(el => {
+                el.className = 'benchmark-image ' + cls;
             });
         }
     </script>
